@@ -1,0 +1,71 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CORPORATE EMPIRE | T7Studio</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-icon">CE</span>
+      <div>
+        <strong>CORPORATE EMPIRE</strong>
+        <small>T7STUDIO</small>
+      </div>
+    </div>
+
+    <div class="resources">
+      <div>💵 <span id="money">1.000</span></div>
+      <div>🪵 <span id="wood">100</span></div>
+      <div>⛏️ <span id="ore">50</span></div>
+      <div>📦 <span id="products">0</span></div>
+    </div>
+  </header>
+
+  <main>
+    <canvas id="gameCanvas"></canvas>
+
+    <section class="build-panel">
+      <div class="panel-heading">
+        <strong>CONSTRUÇÕES</strong>
+        <span id="gameMessage">Escolha uma construção</span>
+      </div>
+
+      <div class="build-buttons">
+        <button data-building="sawmill">
+          <span>🪵</span>
+          <strong>Serraria</strong>
+          <small>$250 · 40 madeira</small>
+        </button>
+
+        <button data-building="mine">
+          <span>⛏️</span>
+          <strong>Mineradora</strong>
+          <small>$350 · 50 madeira</small>
+        </button>
+
+        <button data-building="commercialCenter">
+          <span>🏪</span>
+          <strong>Centro Comercial</strong>
+          <small>$400 · 60 madeira</small>
+        </button>
+
+        <button data-building="factory">
+          <span>🏭</span>
+          <strong>Fábrica</strong>
+          <small>$600 · 80 madeira</small>
+        </button>
+      </div>
+
+      <div class="controls">
+        WASD / Setas: câmera · Scroll: zoom · ESC: cancelar
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
