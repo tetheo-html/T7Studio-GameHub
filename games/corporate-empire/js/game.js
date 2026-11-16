@@ -1,7 +1,9 @@
+
 import { createMap, drawMap } from "./map.js";
 import { Camera } from "./camera.js";
 import { Economy } from "./economy.js";
 import { BuildingSystem } from "./buildings.js";
+import { CompetitorAI } from "./competitors.js";
 import { drawResources } from "./resources.js";
 import { drawWorkers } from "./workers.js";
 import { UI } from "./ui.js";
@@ -14,14 +16,16 @@ export class Game {
     this.map = createMap();
     this.camera = new Camera();
     this.economy = new Economy();
+
+    // Sua empresa.
     this.buildings = new BuildingSystem();
+
+    // Empresa rival.
+    this.competitor = new CompetitorAI();
 
     this.keys = new Set();
     this.selectedBuilding = null;
 
-    // Guardamos a posição do mouse na tela.
-    // A posição no mundo é recalculada durante a renderização,
-    // inclusive quando a câmera se move.
     this.mouse = {
       x: 0,
       y: 0,
@@ -78,6 +82,7 @@ export class Game {
 
     this.canvas.addEventListener("mousemove", event => {
       const rect = this.canvas.getBoundingClientRect();
+
       this.mouse.x = event.clientX - rect.left;
       this.mouse.y = event.clientY - rect.top;
       this.mouse.inside = true;
@@ -96,7 +101,6 @@ export class Game {
       this.camera.zoomAt(event.deltaY);
     }, { passive: false });
 
-    // Botão direito cancela o modo de construção.
     this.canvas.addEventListener("contextmenu", event => {
       if (this.selectedBuilding) {
         event.preventDefault();
@@ -114,7 +118,8 @@ export class Game {
         world.x,
         world.y,
         this.map,
-        this.economy
+        this.economy,
+        this.competitor.buildings.buildings
       );
 
       this.ui.setMessage(result.message);
@@ -132,7 +137,9 @@ export class Game {
     this.ui.select(type);
 
     if (type) {
-      this.ui.setMessage("Mova o mouse e clique para construir. ESC ou botão direito cancela.");
+      this.ui.setMessage(
+        "Mova o mouse e clique para construir. ESC ou botão direito cancela."
+      );
     } else {
       this.ui.setMessage("Construção cancelada.");
     }
@@ -147,10 +154,18 @@ export class Game {
       this.map
     );
 
+    // Atualiza sua empresa.
     this.buildings.update(
       dt,
       this.map,
       this.economy
+    );
+
+    // Atualiza a NEXUS INDUSTRIES.
+    this.competitor.update(
+      dt,
+      this.map,
+      this.buildings.buildings
     );
 
     this.ui.update();
@@ -173,7 +188,10 @@ export class Game {
 
     drawMap(ctx, this.map);
     drawResources(ctx, this.map.resources);
+
+    // Desenha as duas empresas.
     this.buildings.draw(ctx);
+    this.competitor.draw(ctx);
 
     drawWorkers(
       ctx,
@@ -181,7 +199,7 @@ export class Game {
       this.time
     );
 
-    // Prévia do edifício selecionado.
+    // Prévia da construção selecionada.
     if (this.selectedBuilding && this.mouse.inside) {
       const world = this.camera.screenToWorld(
         this.mouse.x,
@@ -194,7 +212,8 @@ export class Game {
         this.selectedBuilding,
         world.x,
         world.y,
-        this.map
+        this.map,
+        this.competitor.buildings.buildings
       );
     }
   }

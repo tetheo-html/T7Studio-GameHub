@@ -1,4 +1,3 @@
-
 import { Economy } from "./economy.js";
 import { BuildingSystem } from "./buildings.js";
 

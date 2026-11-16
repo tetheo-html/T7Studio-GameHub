@@ -1,3 +1,4 @@
+
 export const BUILDING_TYPES = {
   headquarters: {
     name: "Sede",
@@ -54,18 +55,18 @@ export const BUILDING_TYPES = {
 };
 
 export class BuildingSystem {
-  constructor() {
+  constructor(startX = 1200, startY = 800) {
     this.buildings = [
       {
         type: "headquarters",
-        x: 1200,
-        y: 800,
+        x: startX,
+        y: startY,
         timer: 0
       }
     ];
   }
 
-  checkPlacement(type, x, y, map) {
+  checkPlacement(type, x, y, map, occupiedBuildings = []) {
     const definition = BUILDING_TYPES[type];
 
     if (!definition || !definition.cost) {
@@ -92,7 +93,13 @@ export class BuildingSystem {
 
     const spacing = 12;
 
-    for (const building of this.buildings) {
+    // Verifica os edifícios das duas empresas.
+    const allBuildings = [
+      ...this.buildings,
+      ...occupiedBuildings
+    ];
+
+    for (const building of allBuildings) {
       const other = BUILDING_TYPES[building.type];
 
       const overlaps =
@@ -141,14 +148,15 @@ export class BuildingSystem {
     };
   }
 
-  place(type, x, y, map, economy) {
+  place(type, x, y, map, economy, occupiedBuildings = []) {
     const definition = BUILDING_TYPES[type];
 
     const validation = this.checkPlacement(
       type,
       x,
       y,
-      map
+      map,
+      occupiedBuildings
     );
 
     if (!validation.ok) {
@@ -184,7 +192,7 @@ export class BuildingSystem {
 
       if (!definition.output) continue;
 
-      // Produção da Fábrica
+      // Produção da fábrica.
       if (definition.recipe) {
         const recipe = definition.recipe;
 
@@ -211,7 +219,7 @@ export class BuildingSystem {
         continue;
       }
 
-      // Produção das construções tradicionais
+      // Produção das construções tradicionais.
       const resource = definition.resource
         ? map.resources.find(
             item => item.id === building.targetId
@@ -251,7 +259,7 @@ export class BuildingSystem {
     }
   }
 
-  draw(ctx) {
+  draw(ctx, borderColor = "#e4d5a7", companyName = null) {
     for (const building of this.buildings) {
       const definition = BUILDING_TYPES[building.type];
 
@@ -273,7 +281,7 @@ export class BuildingSystem {
         definition.height
       );
 
-      ctx.strokeStyle = "#e4d5a7";
+      ctx.strokeStyle = borderColor;
       ctx.lineWidth = 2;
 
       ctx.strokeRect(
@@ -292,10 +300,25 @@ export class BuildingSystem {
         building.x,
         building.y + definition.height / 2 + 17
       );
+
+      // Identifica a sede de cada empresa.
+      if (
+        companyName &&
+        building.type === "headquarters"
+      ) {
+        ctx.fillStyle = borderColor;
+        ctx.font = "bold 14px Arial";
+
+        ctx.fillText(
+          companyName,
+          building.x,
+          building.y - definition.height / 2 - 12
+        );
+      }
     }
   }
 
-  drawPreview(ctx, type, x, y, map) {
+  drawPreview(ctx, type, x, y, map, occupiedBuildings = []) {
     const definition = BUILDING_TYPES[type];
 
     if (!definition) return;
@@ -304,7 +327,8 @@ export class BuildingSystem {
       type,
       x,
       y,
-      map
+      map,
+      occupiedBuildings
     );
 
     const valid = validation.ok;
