@@ -213,6 +213,7 @@ button.track-card {
 }
 
 .track-preview {
+  position: relative;
   height: 90px;
   background: #202027;
   border-bottom: 1px solid #34343d;
@@ -443,7 +444,7 @@ body.racing .mobile-controls {
   }
 
   .track-preview {
-    height: 115px;
+    height: 65px;
   }
 
   .selected-track-info {
