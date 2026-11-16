@@ -213,49 +213,9 @@ button.track-card {
 }
 
 .track-preview {
-  position: relative;
-  height: 155px;
-  overflow: hidden;
-  display: grid;
-  place-items: center;
-  background: #25252c;
-}
-
-.oval-preview {
-  background:
-    radial-gradient(ellipse, #34343b, #202027 70%);
-}
-
-.oval-shape {
-  width: 155px;
-  height: 85px;
-  border: 15px solid #77777d;
-  border-radius: 50%;
-  box-shadow: 0 0 0 3px #eeeeee30;
-}
-
-.technical-preview {
-  background: #24242b;
-}
-
-.technical-shape {
-  width: 135px;
-  height: 85px;
-  border: 11px solid #77777d;
-  border-radius: 25% 45% 20% 35%;
-  transform: rotate(-15deg);
-}
-
-.gp-preview {
-  background: #24242b;
-}
-
-.grand-shape {
-  width: 145px;
-  height: 85px;
-  border: 11px solid #77777d;
-  border-radius: 35% 15% 35% 15%;
-  transform: rotate(12deg);
+  height: 90px;
+  background: #202027;
+  border-bottom: 1px solid #34343d;
 }
 
 .available-label,
