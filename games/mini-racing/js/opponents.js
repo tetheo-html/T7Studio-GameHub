@@ -110,6 +110,7 @@ export class Opponents {
 
     for (const car of this.cars) {
       // Não param mais quando terminam a corrida.
+      if (car.finished) continue;
 
       let target = points[car.waypoint];
 
@@ -121,10 +122,6 @@ export class Opponents {
       let attempts = 0;
 
       while (distance < 65 && attempts < 5) {
-
-        if (car.finished) {
-          continue;
-        }
         const previousWaypoint = car.waypoint;
 
         car.waypoint = (car.waypoint + 1) % total;
