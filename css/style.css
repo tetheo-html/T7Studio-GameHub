@@ -153,9 +153,10 @@ nav a:hover {
 }
 
 .game-art {
-  min-height: 280px;
-  display: grid;
-  place-items: center;
+  font-size: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .racing-art {
