@@ -115,10 +115,7 @@ export class Game {
 
     const totalRacers = 1 + this.opponents.cars.length;
 
-    if (
-      this.finishOrder.length === totalRacers &&
-      !this.resultShown
-    ) {
+        if (this.player.finished && !this.resultShown) {
       this.running = false;
       this.resultShown = true;
 
