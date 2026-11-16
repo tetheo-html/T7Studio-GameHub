@@ -3,6 +3,7 @@ function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
+// Colisão do carro com os limites da pista.
 function resolveTrackBoundary(car, track) {
   const points = track.points;
   const total = points.length;
@@ -11,7 +12,7 @@ function resolveTrackBoundary(car, track) {
   let nearestY = 0;
   let nearestDistance = Infinity;
 
-  // Procura o ponto mais próximo da linha central.
+  // Procura o segmento mais próximo da linha central.
   for (let i = 0; i < total; i++) {
     const a = points[i];
     const b = points[(i + 1) % total];
@@ -20,6 +21,8 @@ function resolveTrackBoundary(car, track) {
     const dy = b.y - a.y;
 
     const lengthSquared = dx * dx + dy * dy;
+
+    if (lengthSquared === 0) continue;
 
     const t = clamp(
       ((car.x - a.x) * dx + (car.y - a.y) * dy) /
@@ -43,38 +46,37 @@ function resolveTrackBoundary(car, track) {
     }
   }
 
-  // Margem para o tamanho do carro.
-  const maxDistance = track.width / 2 - 12;
+  // Margem de segurança para o tamanho do carro.
+  const maxDistance = Math.max(0, track.width / 2 - 28);
 
   if (nearestDistance <= maxDistance) return;
+  if (nearestDistance < 0.001) return;
 
   const dx = car.x - nearestX;
   const dy = car.y - nearestY;
-
-  if (nearestDistance === 0) return;
-
+  
   const nx = dx / nearestDistance;
   const ny = dy / nearestDistance;
-  
-  // Impede o carro de atravessar a borda.
+
+  // Coloca o carro de volta dentro da pista.
   car.x = nearestX + nx * maxDistance;
   car.y = nearestY + ny * maxDistance;
 
-  // Penalidade de velocidade por impacto.
-  const direction = Math.sign(car.speed);
-
-  car.speed =
-    direction *
-    Math.max(0, Math.abs(car.speed) * 0.78 - 8);
+  // Perde velocidade ao bater na borda.
+  car.speed *= 0.88;
 }
 
+// Colisões entre os veículos e com a pista.
 export function resolveCollisions(player, opponents, track) {
-  const cars = [player, ...opponents.cars];
+  const cars = [
+    player,
+    ...opponents.cars.filter(car => !car.finished)
+  ];
 
   const CAR_RADIUS = 23;
-  const PUSH_FORCE = 0.55;
   const SPEED_LOSS = 0.97;
   const IMPACT_LOSS = 5;
+  const PUSH_FORCE = 0.55;
 
   // Colisão entre carros.
   for (let i = 0; i < cars.length; i++) {
@@ -101,8 +103,15 @@ export function resolveCollisions(player, opponents, track) {
       b.x += nx * overlap * 0.5;
       b.y += ny * overlap * 0.5;
 
-      a.speed = Math.max(0, a.speed * SPEED_LOSS - IMPACT_LOSS);
-      b.speed = Math.max(0, b.speed * SPEED_LOSS - IMPACT_LOSS);
+      a.speed = Math.max(
+        0,
+        a.speed * SPEED_LOSS - IMPACT_LOSS
+      );
+
+      b.speed = Math.max(
+        0,
+        b.speed * SPEED_LOSS - IMPACT_LOSS
+      );
 
       a.speed -= PUSH_FORCE;
       b.speed -= PUSH_FORCE;
@@ -112,7 +121,7 @@ export function resolveCollisions(player, opponents, track) {
     }
   }
 
-  // Colisão com as bordas da pista.
+  // Colisão com os limites da pista.
   for (const car of cars) {
     resolveTrackBoundary(car, track);
   }
