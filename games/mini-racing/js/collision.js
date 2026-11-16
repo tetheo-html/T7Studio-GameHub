@@ -51,9 +51,11 @@ function resolveTrackBoundary(car, track) {
   const dx = car.x - nearestX;
   const dy = car.y - nearestY;
 
+  if (nearestDistance === 0) return;
+
   const nx = dx / nearestDistance;
   const ny = dy / nearestDistance;
-
+  
   // Impede o carro de atravessar a borda.
   car.x = nearestX + nx * maxDistance;
   car.y = nearestY + ny * maxDistance;
