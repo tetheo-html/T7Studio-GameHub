@@ -63,7 +63,7 @@ function resolveTrackBoundary(car, track) {
   car.y = nearestY + ny * maxDistance;
 
   // Perde velocidade ao bater na borda.
-  car.speed *= 0.88;
+  car.speed *= 0.92;
 }
 
 // Colisões entre os veículos e com a pista.
