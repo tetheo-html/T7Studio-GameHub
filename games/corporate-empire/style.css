@@ -291,3 +291,40 @@ main {
     font-size: 9px;
   }
 }
+
+/* =========================
+   INFORMAÇÕES DO TERRITÓRIO
+========================= */
+
+.territory-toggle {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 5;
+
+  padding: 11px 14px;
+  border: 1px solid #465448;
+  border-radius: 7px;
+
+  background: rgba(24, 32, 26, 0.95);
+  color: #f0f0e8;
+
+  font-size: 11px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.territory-toggle:hover,
+.territory-toggle.active {
+  border-color: #d6a747;
+  background: #394735;
+}
+
+@media (max-width: 600px) {
+  .territory-toggle {
+    top: 8px;
+    left: 8px;
+    padding: 8px;
+    font-size: 9px;
+  }
+}

@@ -1,4 +1,8 @@
-import { createMap, drawMap } from "./map.js";
+import {
+  createMap,
+  drawMap,
+  drawTerritoryInfo
+} from "./map.js";
 import { Camera } from "./camera.js";
 import { Economy } from "./economy.js";
 import { BuildingSystem } from "./buildings.js";
@@ -18,6 +22,26 @@ export class Game {
 
     this.buildings = new BuildingSystem();
     this.competitor = new CompetitorAI();
+
+    this.showTerritoryInfo = false;
+
+this.territoryToggle = document.getElementById(
+  "territoryToggle"
+);
+
+this.territoryToggle.addEventListener("click", () => {
+  this.showTerritoryInfo = !this.showTerritoryInfo;
+
+  this.territoryToggle.classList.toggle(
+    "active",
+    this.showTerritoryInfo
+  );
+
+  this.territoryToggle.textContent =
+    this.showTerritoryInfo
+      ? "👁 Informações: ON"
+      : "👁 Informações: OFF";
+});
 
     this.keys = new Set();
     this.selectedBuilding = null;
@@ -146,10 +170,11 @@ export class Game {
   update(dt) {
     this.time += dt;
 
-    this.camera.update(
+   this.camera.update(
       this.keys,
       dt,
-      this.map
+      this.map,
+      this.canvas
     );
 
     // Atualiza sua empresa.
@@ -185,8 +210,12 @@ export class Game {
 
     ctx.scale(zoom, zoom);
 
-    drawMap(ctx, this.map);
-    drawResources(ctx, this.map.resources);
+      drawMap(ctx, this.map);
+drawResources(ctx, this.map.resources);
+
+if (this.showTerritoryInfo) {
+  drawTerritoryInfo(ctx, this.map);
+}
 
     this.buildings.draw(ctx);
     this.competitor.draw(ctx);

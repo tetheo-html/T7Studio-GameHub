@@ -7,7 +7,7 @@ export class Camera {
     this.speed = 650;
   }
 
-  update(keys, dt, map) {
+  update(keys, dt, map, canvas) {
     let dx = 0;
     let dy = 0;
 
@@ -21,11 +21,29 @@ export class Camera {
     this.x += (dx / length) * this.speed * dt / this.zoom;
     this.y += (dy / length) * this.speed * dt / this.zoom;
 
-    const halfWidth = 500 / this.zoom;
-    const halfHeight = 300 / this.zoom;
+    // Usa o tamanho real do canvas.
+    const viewportWidth = canvas ? canvas.width : 1000;
+    const viewportHeight = canvas ? canvas.height : 600;
 
-    this.x = Math.max(halfWidth, Math.min(map.width - halfWidth, this.x));
-    this.y = Math.max(halfHeight, Math.min(map.height - halfHeight, this.y));
+    const halfWidth = Math.min(
+      map.width / 2,
+      viewportWidth / (2 * this.zoom)
+    );
+
+    const halfHeight = Math.min(
+      map.height / 2,
+      viewportHeight / (2 * this.zoom)
+    );
+
+    this.x = Math.max(
+      halfWidth,
+      Math.min(map.width - halfWidth, this.x)
+    );
+
+    this.y = Math.max(
+      halfHeight,
+      Math.min(map.height - halfHeight, this.y)
+    );
   }
 
   screenToWorld(screenX, screenY, canvas) {
