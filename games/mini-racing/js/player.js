@@ -176,8 +176,10 @@ export class Player {
 
     this.previousFinishSide = gate.side;
 
-    this.progress =
-      (this.lap - 1) * total + bestIndex;
+        this.progress = Math.min(
+      this.totalLaps * total,
+      (this.lap - 1) * total + bestIndex
+    );
   }
 }
 

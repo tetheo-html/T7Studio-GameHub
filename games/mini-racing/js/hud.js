@@ -16,7 +16,7 @@ function formatTime(milliseconds) {
 export function updateHUD(player, position, elapsed) {
   document.getElementById("lap").textContent =
     `${player.lap} / ${player.totalLaps}`;
-      
+
   document.getElementById("position").textContent =
     `${position} / 6`;
 
@@ -27,7 +27,13 @@ export function updateHUD(player, position, elapsed) {
     `${Math.round(Math.abs(player.speed) * 0.45)} km/h`;
 }
 
-export function showResult(position, elapsed, racers, player) {
+export function showResult(
+  position,
+  elapsed,
+  racers,
+  player,
+  finishOrder
+) {
   const result = document.getElementById("result");
   const title = document.getElementById("resultTitle");
   const text = document.getElementById("resultText");
@@ -43,26 +49,19 @@ export function showResult(position, elapsed, racers, player) {
     </div>
 
     <div class="result-stat">
-      <span>TEMPO TOTAL</span>
+      <span>SEU TEMPO</span>
       <strong>${formatTime(elapsed)}</strong>
     </div>
   `;
 
-  const ranking = racers
-    .map((racer, index) => ({
-      racer,
-      originalIndex: index
-    }))
-    .sort((a, b) => b.racer.progress - a.racer.progress);
-
   standings.innerHTML = "";
 
-  ranking.forEach((entry, index) => {
-    const isPlayer = entry.racer === player;
+  finishOrder.forEach((racer, index) => {
+    const isPlayer = racer === player;
 
     const name = isPlayer
       ? "VOCÊ"
-      : `PILOTO ${String(entry.originalIndex).padStart(2, "0")}`;
+      : `PILOTO ${String(racers.indexOf(racer)).padStart(2, "0")}`;
 
     const row = document.createElement("div");
     row.className = "standing-row";
@@ -74,9 +73,7 @@ export function showResult(position, elapsed, racers, player) {
     row.innerHTML = `
       <strong class="standing-position">${index + 1}º</strong>
       <span class="standing-name">${name}</span>
-      <span class="standing-status">
-        ${isPlayer ? "FINALIZOU" : "EM CORRIDA"}
-      </span>
+      <span class="standing-status">FINALIZOU</span>
     `;
 
     standings.appendChild(row);

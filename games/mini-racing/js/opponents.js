@@ -22,7 +22,6 @@ function clamp(value, min, max) {
 export class Opponents {
   constructor(track, totalLaps = 3) {
     this.cars = [];
-    this.finishOrder = [];
     this.totalLaps = totalLaps;
 
     const colors = [
@@ -110,7 +109,7 @@ export class Opponents {
     this.player = player;
 
     for (const car of this.cars) {
-      if (car.finished) continue;
+      // Não param mais quando terminam a corrida.
 
       let target = points[car.waypoint];
 
@@ -126,14 +125,16 @@ export class Opponents {
 
         car.waypoint = (car.waypoint + 1) % total;
 
-        if (car.waypoint < previousWaypoint) {
+        if (
+          car.waypoint < previousWaypoint &&
+          !car.finished
+        ) {
           car.lap++;
 
           if (car.lap > this.totalLaps) {
             car.lap = this.totalLaps;
             car.finished = true;
             car.progress = this.totalLaps * total;
-            break;
           }
         }
 
@@ -147,9 +148,6 @@ export class Opponents {
         attempts++;
       }
 
-      if (car.finished) continue;
-
-      // Detecta carros à frente e escolhe uma faixa.
       const avoidance = this.getAvoidance(car);
 
       const desiredLane = clamp(
@@ -158,7 +156,6 @@ export class Opponents {
         40
       );
 
-      // Muda de faixa suavemente.
       car.laneOffset += (
         desiredLane - car.laneOffset
       ) * Math.min(1, dt * 3);
@@ -178,7 +175,6 @@ export class Opponents {
         lookAheadPoint.x - previous.x
       );
 
-      // Ponto-alvo deslocado para a faixa escolhida.
       const targetX =
         target.x - Math.sin(trackAngle) * car.laneOffset;
 
@@ -210,8 +206,11 @@ export class Opponents {
       car.x += Math.cos(car.angle) * car.speed * dt;
       car.y += Math.sin(car.angle) * car.speed * dt;
 
-      car.progress =
-        (car.lap - 1) * total + car.waypoint;
+      // O progresso fica congelado após a chegada.
+      if (!car.finished) {
+        car.progress =
+          (car.lap - 1) * total + car.waypoint;
+      }
     }
   }
 

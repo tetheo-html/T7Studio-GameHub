@@ -8,16 +8,15 @@ import { updateHUD, showResult } from "./hud.js";
 import { resolveCollisions } from "./collision.js";
 
 export class Game {
-    constructor(trackId = "oval", totalLaps = 3) {
-      this.totalLaps = totalLaps;
-      
+  constructor(trackId = "oval", totalLaps = 3) {
+    this.totalLaps = totalLaps;
+
     this.canvas = document.getElementById("gameCanvas");
     this.ctx = this.canvas.getContext("2d");
 
     this.resize();
     window.addEventListener("resize", () => this.resize());
 
-    // Cria o circuito escolhido no menu.
     this.track = createTrack(trackId);
 
     this.player = new Player(this.track, this.totalLaps);
@@ -33,15 +32,15 @@ export class Game {
     this.resultShown = false;
 
     this.startTime = 0;
+    this.playerFinishTime = null;
     this.lastFrame = performance.now();
 
     this.finishOrder = [];
 
-    document.getElementById(
-      "restartButton"
-    ).addEventListener("click", () => {
-      window.location.reload();
-    });
+    document.getElementById("restartButton")
+      .addEventListener("click", () => {
+        window.location.reload();
+      });
 
     requestAnimationFrame((time) => this.loop(time));
   }
@@ -52,10 +51,7 @@ export class Game {
     this.started = true;
     this.startTime = performance.now();
 
-    document.getElementById(
-      "menuScreen"
-    ).classList.add("hidden");
-
+    document.getElementById("menuScreen").classList.add("hidden");
     document.body.classList.add("racing");
   }
 
@@ -65,17 +61,16 @@ export class Game {
   }
 
   registerFinishers() {
-    const racers = [
-      this.player,
-      ...this.opponents.cars
-    ];
+    const racers = [this.player, ...this.opponents.cars];
 
     for (const racer of racers) {
-      if (
-        racer.finished &&
-        !this.finishOrder.includes(racer)
-      ) {
+      if (racer.finished && !this.finishOrder.includes(racer)) {
         this.finishOrder.push(racer);
+
+        if (racer === this.player) {
+          this.playerFinishTime =
+            performance.now() - this.startTime;
+        }
 
         console.log(
           "Piloto chegou em:",
@@ -86,14 +81,13 @@ export class Game {
   }
 
   getPosition() {
-    const racers = [
-      this.player,
-      ...this.opponents.cars
-    ];
+    if (this.player.finished) {
+      return this.finishOrder.indexOf(this.player) + 1;
+    }
 
-    racers.sort((a, b) => {
-      return b.progress - a.progress;
-    });
+    const racers = [this.player, ...this.opponents.cars];
+
+    racers.sort((a, b) => b.progress - a.progress);
 
     return racers.indexOf(this.player) + 1;
   }
@@ -101,56 +95,40 @@ export class Game {
   update(dt) {
     if (!this.started || !this.running) return;
 
-    this.player.update(
-      this.controls,
-      this.track,
-      dt
-    );
+    this.player.update(this.controls, this.track, dt);
 
-    this.opponents.update(
-      this.track,
-      dt,
-      this.player
-    );
+    this.opponents.update(this.track, dt, this.player);
 
-    resolveCollisions(
-      this.player,
-      this.opponents
-    );
+    resolveCollisions(this.player, this.opponents);
 
     this.registerFinishers();
 
     this.camera.update(this.player, dt);
 
-    const elapsed =
-      performance.now() - this.startTime;
+    const elapsed = this.player.finished
+      ? this.playerFinishTime
+      : performance.now() - this.startTime;
 
     const position = this.getPosition();
 
-    updateHUD(
-      this.player,
-      position,
-      elapsed
-    );
+    updateHUD(this.player, position, elapsed);
+
+    const totalRacers = 1 + this.opponents.cars.length;
 
     if (
-      this.player.finished &&
+      this.finishOrder.length === totalRacers &&
       !this.resultShown
     ) {
       this.running = false;
       this.resultShown = true;
 
-                const racers = [
-            this.player,
-            ...this.opponents.cars
-          ];
-
-          showResult(
-            position,
-            elapsed,
-            racers,
-            this.player
-          );
+      showResult(
+        position,
+        this.playerFinishTime,
+        [this.player, ...this.opponents.cars],
+        this.player,
+        this.finishOrder
+      );
     }
   }
 
