@@ -1,4 +1,3 @@
-
 import { createMap, drawMap } from "./map.js";
 import { Camera } from "./camera.js";
 import { Economy } from "./economy.js";
@@ -17,10 +16,7 @@ export class Game {
     this.camera = new Camera();
     this.economy = new Economy();
 
-    // Sua empresa.
     this.buildings = new BuildingSystem();
-
-    // Empresa rival.
     this.competitor = new CompetitorAI();
 
     this.keys = new Set();
@@ -37,12 +33,14 @@ export class Game {
 
     this.ui = new UI(
       this.economy,
-      type => this.selectBuilding(type)
+      type => this.selectBuilding(type),
+      this.buildings
     );
 
     this.resize();
     this.addEvents();
-    this.ui.update();
+
+    this.ui.update(this.competitor);
   }
 
   resize() {
@@ -128,7 +126,7 @@ export class Game {
         this.selectBuilding(null);
       }
 
-      this.ui.update();
+      this.ui.update(this.competitor);
     });
   }
 
@@ -168,7 +166,8 @@ export class Game {
       this.buildings.buildings
     );
 
-    this.ui.update();
+    // Atualiza o painel.
+    this.ui.update(this.competitor);
   }
 
   render() {
@@ -189,7 +188,6 @@ export class Game {
     drawMap(ctx, this.map);
     drawResources(ctx, this.map.resources);
 
-    // Desenha as duas empresas.
     this.buildings.draw(ctx);
     this.competitor.draw(ctx);
 
@@ -199,7 +197,6 @@ export class Game {
       this.time
     );
 
-    // Prévia da construção selecionada.
     if (this.selectedBuilding && this.mouse.inside) {
       const world = this.camera.screenToWorld(
         this.mouse.x,

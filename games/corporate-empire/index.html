@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -27,6 +26,42 @@
 
   <main>
     <canvas id="gameCanvas"></canvas>
+
+    <section class="competitor-panel">
+      <div class="competitor-heading">
+        <strong>DISPUTA CORPORATIVA</strong>
+        <span>● AO VIVO</span>
+      </div>
+
+      <div class="company-card player-card">
+        <div class="company-name">T7STUDIO</div>
+        <div class="company-capital" id="playerCapital">$1.000</div>
+        <div class="company-details">
+          <span>📦 <span id="playerProducts">0</span> produtos</span>
+          <span>🏭 <span id="playerFactories">0</span> fábricas</span>
+        </div>
+        <div class="production">
+          Capacidade: <strong id="playerProduction">0/min</strong>
+        </div>
+      </div>
+
+      <div class="company-card rival-card">
+        <div class="company-name">NEXUS INDUSTRIES</div>
+        <div class="company-capital" id="rivalCapital">$1.500</div>
+        <div class="company-details">
+          <span>📦 <span id="rivalProducts">0</span> produtos</span>
+          <span>🏭 <span id="rivalFactories">0</span> fábricas</span>
+        </div>
+        <div class="production">
+          Capacidade: <strong id="rivalProduction">0/min</strong>
+        </div>
+      </div>
+
+      <div class="competition-footer">
+        <span>LIDERANÇA POR CAPITAL</span>
+        <strong id="economicLeader">NEXUS INDUSTRIES</strong>
+      </div>
+    </section>
 
     <section class="build-panel">
       <div class="panel-heading">
