@@ -132,9 +132,12 @@ export class Opponents {
           car.lap++;
 
           if (car.lap > this.totalLaps) {
-            car.lap = this.totalLaps;
-            car.finished = true;
-            car.progress = this.totalLaps * total;
+             car.lap = this.totalLaps;
+             car.finished = true;
+             car.progress = this.totalLaps * total;
+
+            console.log("Bot terminou a corrida!");
+            break;
           }
         }
 
