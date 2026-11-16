@@ -121,6 +121,10 @@ export class Opponents {
       let attempts = 0;
 
       while (distance < 65 && attempts < 5) {
+
+        if (car.finished) {
+          continue;
+        }
         const previousWaypoint = car.waypoint;
 
         car.waypoint = (car.waypoint + 1) % total;
@@ -132,14 +136,15 @@ export class Opponents {
           car.lap++;
 
           if (car.lap > this.totalLaps) {
-             car.lap = this.totalLaps;
-             car.finished = true;
-             car.progress = this.totalLaps * total;
+  car.lap = this.totalLaps;
+  car.finished = true;
+  car.progress = this.totalLaps * total;
 
-            console.log("Bot terminou a corrida!");
-            break;
-          }
-        }
+  console.log("Bot terminou a corrida!");
+
+  break;
+  }
+}
 
         target = points[car.waypoint];
 
