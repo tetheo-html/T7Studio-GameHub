@@ -215,8 +215,10 @@ export class Opponents {
   }
 
   draw(ctx) {
-    for (const car of this.cars) {
-      drawCar(ctx, car);
+  for (const car of this.cars) {
+    if (car.finished) continue;
+
+    drawCar(ctx, car);
     }
   }
 }

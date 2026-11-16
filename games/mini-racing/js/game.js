@@ -144,8 +144,10 @@ export class Game {
     this.camera.apply(ctx, this.canvas);
 
     drawTrack(ctx, this.track);
-    this.opponents.draw(ctx);
-    drawCar(ctx, this.player, true);
+   this.opponents.draw(ctx)
+    if (!this.player.finished) {
+      drawCar(ctx, this.player, true);
+    }
 
     ctx.restore();
   }
