@@ -328,3 +328,212 @@ main {
     font-size: 9px;
   }
 }
+
+/* =========================
+   CONTROLES MOBILE
+========================= */
+
+/* Impede o navegador de interpretar gestos como zoom da página. */
+#gameCanvas {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Ações do painel de construção. */
+.panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#cancelBuild {
+  padding: 7px 11px;
+  border: 1px solid #b85c53;
+  border-radius: 6px;
+  background: #472b29;
+  color: #fff;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+#cancelBuild:hover {
+  background: #653630;
+}
+
+#cancelBuild[hidden] {
+  display: none;
+}
+
+/* Layout para celulares e tablets pequenos. */
+@media (max-width: 600px) {
+  body {
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .topbar {
+    height: 58px;
+    padding: 0 8px;
+    gap: 8px;
+  }
+
+  .brand {
+    gap: 6px;
+  }
+
+  .brand-icon {
+    padding: 7px;
+    font-size: 12px;
+  }
+
+  .brand strong {
+    font-size: 10px;
+    letter-spacing: 0;
+  }
+
+  .brand small {
+    font-size: 8px;
+  }
+
+  .resources {
+    gap: 7px;
+    font-size: 10px;
+  }
+
+  .resources div {
+    min-width: auto;
+    white-space: nowrap;
+  }
+
+  main {
+    height: calc(100vh - 58px);
+    height: calc(100dvh - 58px);
+  }
+
+  .build-panel {
+    padding: 9px;
+  }
+
+  .panel-heading {
+    gap: 6px;
+    font-size: 10px;
+  }
+
+  .panel-actions {
+    gap: 5px;
+  }
+
+  #gameMessage {
+    font-size: 9px;
+  }
+
+  #cancelBuild {
+    padding: 7px;
+    font-size: 9px;
+  }
+
+  .build-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .build-buttons button {
+    width: 100%;
+    min-width: 0;
+    padding: 8px;
+  }
+
+  .build-buttons button span {
+    font-size: 20px;
+    margin-right: 6px;
+  }
+
+  .build-buttons button strong {
+    font-size: 11px;
+  }
+
+  .build-buttons button small {
+    font-size: 9px;
+  }
+
+  .controls {
+    display: none;
+  }
+
+  .competitor-panel {
+    top: 48px;
+    right: 7px;
+    width: 155px;
+    padding: 7px;
+  }
+
+  .competitor-heading {
+    font-size: 8px;
+    margin-bottom: 6px;
+  }
+
+  .competitor-heading span {
+    font-size: 7px;
+  }
+
+  .company-card {
+    padding: 7px;
+    margin-bottom: 5px;
+  }
+
+  .company-name {
+    font-size: 9px;
+  }
+
+  .company-capital {
+    font-size: 16px;
+    margin: 3px 0;
+  }
+
+  .company-details {
+    font-size: 8px;
+  }
+
+  .production {
+    font-size: 8px;
+    margin-top: 5px;
+    padding-top: 5px;
+  }
+
+  .competition-footer {
+    padding-top: 6px;
+  }
+
+  .competition-footer span {
+    font-size: 7px;
+  }
+
+  .competition-footer strong {
+    font-size: 9px;
+  }
+
+  .territory-toggle {
+    top: 8px;
+    left: 8px;
+    padding: 8px;
+    font-size: 9px;
+  }
+}
+
+/* Celulares muito estreitos. */
+@media (max-width: 360px) {
+  .brand strong {
+    font-size: 9px;
+  }
+
+  .resources {
+    gap: 5px;
+    font-size: 9px;
+  }
+
+  .competitor-panel {
+    width: 140px;
+  }
+}

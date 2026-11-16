@@ -1,4 +1,3 @@
-
 export class Camera {
   constructor() {
     this.x = 1200;
@@ -21,7 +20,6 @@ export class Camera {
     this.x += (dx / length) * this.speed * dt / this.zoom;
     this.y += (dy / length) * this.speed * dt / this.zoom;
 
-    // Usa o tamanho real do canvas.
     const viewportWidth = canvas ? canvas.width : 1000;
     const viewportHeight = canvas ? canvas.height : 600;
 
@@ -56,5 +54,25 @@ export class Camera {
   zoomAt(delta) {
     this.zoom *= delta > 0 ? 0.9 : 1.1;
     this.zoom = Math.max(0.4, Math.min(1.6, this.zoom));
+  }
+
+  // Aproxima ou afasta mantendo o ponto escolhido no mesmo lugar.
+  zoomAtPoint(screenX, screenY, canvas, factor) {
+    const worldBefore = this.screenToWorld(
+      screenX,
+      screenY,
+      canvas
+    );
+
+    this.zoom = Math.max(
+      0.4,
+      Math.min(1.6, this.zoom * factor)
+    );
+
+    this.x = worldBefore.x -
+      (screenX - canvas.width / 2) / this.zoom;
+
+    this.y = worldBefore.y -
+      (screenY - canvas.height / 2) / this.zoom;
   }
 }

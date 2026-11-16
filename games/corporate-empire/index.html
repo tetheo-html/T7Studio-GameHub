@@ -6,10 +6,12 @@
   <title>CORPORATE EMPIRE | T7Studio</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
   <header class="topbar">
     <div class="brand">
       <span class="brand-icon">CE</span>
+
       <div>
         <strong>CORPORATE EMPIRE</strong>
         <small>T7STUDIO</small>
@@ -28,8 +30,8 @@
     <canvas id="gameCanvas"></canvas>
 
     <button id="territoryToggle" class="territory-toggle">
-  👁 Informações: OFF
-</button>
+      👁 Informações: OFF
+    </button>
 
     <section class="competitor-panel">
       <div class="competitor-heading">
@@ -40,10 +42,12 @@
       <div class="company-card player-card">
         <div class="company-name">T7STUDIO</div>
         <div class="company-capital" id="playerCapital">$1.000</div>
+
         <div class="company-details">
           <span>📦 <span id="playerProducts">0</span> produtos</span>
           <span>🏭 <span id="playerFactories">0</span> fábricas</span>
         </div>
+
         <div class="production">
           Capacidade: <strong id="playerProduction">0/min</strong>
         </div>
@@ -52,10 +56,12 @@
       <div class="company-card rival-card">
         <div class="company-name">NEXUS INDUSTRIES</div>
         <div class="company-capital" id="rivalCapital">$1.500</div>
+
         <div class="company-details">
           <span>📦 <span id="rivalProducts">0</span> produtos</span>
           <span>🏭 <span id="rivalFactories">0</span> fábricas</span>
         </div>
+
         <div class="production">
           Capacidade: <strong id="rivalProduction">0/min</strong>
         </div>
@@ -70,7 +76,14 @@
     <section class="build-panel">
       <div class="panel-heading">
         <strong>CONSTRUÇÕES</strong>
-        <span id="gameMessage">Escolha uma construção</span>
+
+        <div class="panel-actions">
+          <span id="gameMessage">Escolha uma construção</span>
+
+          <button id="cancelBuild" hidden>
+            ✕ Cancelar
+          </button>
+        </div>
       </div>
 
       <div class="build-buttons">
@@ -100,7 +113,9 @@
       </div>
 
       <div class="controls">
-        WASD / Setas: câmera · Scroll: zoom · ESC: cancelar
+        PC: WASD / Setas para mover · Scroll para zoom · ESC para cancelar
+        <br>
+        Celular: arraste para mover · Pinça para zoom · Toque para construir
       </div>
     </section>
   </main>
