@@ -53,114 +53,6 @@ export class Player {
     };
   }
 
-  // Colisão física com as bordas da pista.
-  resolveTrackBoundary(track) {
-    const points = track.points;
-    const total = points.length;
-
-    let nearestX = 0;
-    let nearestY = 0;
-    let nearestDistance = Infinity;
-
-    // Encontra o segmento mais próximo.
-    for (let i = 0; i < total; i++) {
-      const a = points[i];
-      const b = points[(i + 1) % total];
-
-      const dx = b.x - a.x;
-      const dy = b.y - a.y;
-
-      const lengthSquared = dx * dx + dy * dy;
-
-      if (lengthSquared === 0) continue;
-
-      const t = Math.max(
-        0,
-        Math.min(
-          1,
-          ((this.x - a.x) * dx +
-            (this.y - a.y) * dy) /
-            lengthSquared
-        )
-      );
-
-      const closestX = a.x + dx * t;
-      const closestY = a.y + dy * t;
-
-      const distance = Math.hypot(
-        this.x - closestX,
-        this.y - closestY
-      );
-
-      if (distance < nearestDistance) {
-        nearestDistance = distance;
-        nearestX = closestX;
-        nearestY = closestY;
-      }
-    }
-
-    // Limite seguro para o tamanho do carro.
-    const maxDistance = Math.max(
-      0,
-      track.width / 2 - 28
-    );
-
-    if (nearestDistance <= maxDistance) return;
-    if (nearestDistance < 0.001) return;
-
-    const dx = this.x - nearestX;
-    const dy = this.y - nearestY;
-
-    const nx = dx / nearestDistance;
-    const ny = dy / nearestDistance;
-
-    // Impede que o carro atravesse a parede.
-    this.x = nearestX + nx * maxDistance;
-    this.y = nearestY + ny * maxDistance;
-
-    // Calcula a velocidade atual.
-    const oldAngle = this.angle;
-
-    let vx = Math.cos(this.angle) * this.speed;
-    let vy = Math.sin(this.angle) * this.speed;
-
-    // Verifica se o carro está empurrando contra a parede.
-    const outwardSpeed = vx * nx + vy * ny;
-
-    if (outwardSpeed > 0) {
-      // Remove a velocidade que empurra o carro
-      // para fora da pista.
-      vx -= outwardSpeed * nx;
-      vy -= outwardSpeed * ny;
-
-      // Pequena perda de energia no impacto.
-      vx *= 0.98;
-      vy *= 0.98;
-
-      const newSpeed = Math.hypot(vx, vy);
-
-      if (newSpeed < 1) {
-        this.speed = 0;
-        return;
-      }
-
-      // Preserva a possibilidade de andar de ré.
-      const headingX = Math.cos(oldAngle);
-      const headingY = Math.sin(oldAngle);
-
-      const direction =
-        vx * headingX + vy * headingY < 0 ? -1 : 1;
-
-      if (direction < 0) {
-        this.angle = Math.atan2(-vy, -vx);
-      } else {
-        this.angle = Math.atan2(vy, vx);
-      }
-
-      this.speed = newSpeed * direction;
-    }
-  }
-
   update(input, track, dt) {
     if (this.finished) return;
 
@@ -217,8 +109,6 @@ export class Player {
     this.y += Math.sin(this.angle) * this.speed * dt;
 
     // Resolve a colisão imediatamente após o movimento.
-    this.resolveTrackBoundary(track);
-
     this.updateProgress(track);
   }
 
