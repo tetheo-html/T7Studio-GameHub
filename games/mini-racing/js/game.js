@@ -99,7 +99,11 @@ export class Game {
 
     this.opponents.update(this.track, dt, this.player);
 
-    resolveCollisions(this.player, this.opponents);
+      resolveCollisions(
+      this.player,
+      this.opponents,
+      this.track
+    );
 
     this.registerFinishers();
 

@@ -1,8 +1,4 @@
 
-import {
-  isOnTrack
-} from "./track.js";
-
 export class Player {
   constructor(track, totalLaps = 3) {
     const start = track.points[0];
@@ -60,12 +56,6 @@ export class Player {
   update(input, track, dt) {
     if (this.finished) return;
 
-    const onTrack = isOnTrack(track, this.x, this.y);
-
-    const maxSpeed = onTrack
-      ? this.maxSpeed
-      : 170;
-
     // Aceleração e frenagem
     if (input.accelerate) {
       this.speed += this.acceleration * dt;
@@ -91,7 +81,7 @@ export class Player {
 
     this.speed = Math.max(
       -100,
-      Math.min(maxSpeed, this.speed)
+      Math.min(this.maxSpeed, this.speed)
     );
 
     // Direção
@@ -117,10 +107,6 @@ export class Player {
     // Movimento
     this.x += Math.cos(this.angle) * this.speed * dt;
     this.y += Math.sin(this.angle) * this.speed * dt;
-
-    if (!onTrack) {
-      this.speed *= Math.pow(0.88, dt * 60);
-    }
 
     this.updateProgress(track);
   }
@@ -176,7 +162,7 @@ export class Player {
 
     this.previousFinishSide = gate.side;
 
-        this.progress = Math.min(
+    this.progress = Math.min(
       this.totalLaps * total,
       (this.lap - 1) * total + bestIndex
     );
