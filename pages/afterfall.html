@@ -59,6 +59,30 @@
       letter-spacing: 2px;
     }
 
+    .empire-actions {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-top: 30px;
+    }
+
+    .empire-play {
+      background: #f0bd42;
+      color: #101014;
+      padding: 16px 30px;
+      text-decoration: none;
+      font-weight: bold;
+      letter-spacing: 1px;
+      border-radius: 4px;
+      transition: .2s;
+    }
+
+    .empire-play:hover {
+      background: #ffd66b;
+      transform: translateY(-3px);
+    }
+
     .empire-content {
       max-width: 1000px;
       margin: auto;
@@ -132,6 +156,15 @@
 
       <div class="empire-status">
         EM DESENVOLVIMENTO
+      </div>
+
+      <div class="empire-actions">
+        <a
+          href="../games/corporate-empire/index.html"
+          class="empire-play"
+        >
+          JOGAR AGORA →
+        </a>
       </div>
     </section>
 
