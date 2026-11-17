@@ -1,4 +1,3 @@
-
 export class UI {
   constructor(economy, onBuild, buildings, onUpgrade) {
     this.economy = economy;
@@ -6,7 +5,7 @@ export class UI {
     this.buildings = buildings;
     this.onUpgrade = onUpgrade;
 
-    // Recursos do jogador.
+    // HUD.
     this.money = document.getElementById("money");
     this.wood = document.getElementById("wood");
     this.ore = document.getElementById("ore");
@@ -48,7 +47,11 @@ export class UI {
       );
     }
 
-    // Painel de concorrência.
+    // Painel de concorrência existente.
+    this.competitorPanel = document.querySelector(
+      ".competitor-panel"
+    );
+
     this.playerCapital = document.getElementById("playerCapital");
     this.playerProducts = document.getElementById("playerProducts");
     this.playerFactories = document.getElementById("playerFactories");
@@ -61,6 +64,23 @@ export class UI {
 
     this.economicLeader = document.getElementById("economicLeader");
 
+    // Cartões adicionais.
+    this.extraCompanies = new Map();
+
+    this.extraCompaniesContainer = document.createElement("div");
+    this.extraCompaniesContainer.style.cssText = `
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    `;
+
+    if (this.competitorPanel) {
+      this.competitorPanel.appendChild(
+        this.extraCompaniesContainer
+      );
+    }
+
     // Botões de construção.
     this.buttons = document.querySelectorAll("[data-building]");
 
@@ -72,8 +92,8 @@ export class UI {
 
     // Painel de melhorias.
     this.upgradeTarget = null;
-    this.upgradePanel = document.createElement("div");
 
+    this.upgradePanel = document.createElement("div");
     this.upgradePanel.style.cssText = `
       position: fixed;
       right: 20px;
@@ -229,28 +249,106 @@ export class UI {
       this.sellProducts("all");
     });
 
-    // Ativa o drag nos painéis.
+    // Arrastar painéis.
     this.makeDraggable(this.marketPanel, this.marketTitle);
     this.makeDraggable(this.upgradePanel, this.upgradeTitle);
 
-      // Painel de disputa corporativa.
-this.competitorPanel = document.querySelector(".competitor-panel");
+    if (this.competitorPanel) {
+      const handle = this.competitorPanel.querySelector(
+        ".competitor-heading"
+      );
 
-if (this.competitorPanel) {
-  const competitorHandle = this.competitorPanel.querySelector(
-    ".competitor-heading"
-  );
+      if (handle) {
+        this.makeDraggable(this.competitorPanel, handle);
+      }
+    }
+  }
 
-  if (competitorHandle) {
-    this.makeDraggable(
-      this.competitorPanel,
-      competitorHandle
+  createCompanyCard(name, color) {
+    const card = document.createElement("div");
+
+    card.style.cssText = `
+      background: rgba(0,0,0,0.2);
+      border: 1px solid ${color};
+      border-radius: 7px;
+      padding: 10px;
+      color: white;
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+    `;
+
+    const title = document.createElement("strong");
+    title.textContent = name;
+    title.style.cssText = `
+      display: block;
+      color: ${color};
+      margin-bottom: 7px;
+      font-size: 12px;
+    `;
+
+    const capital = document.createElement("div");
+    const products = document.createElement("div");
+    const factories = document.createElement("div");
+    const production = document.createElement("div");
+
+    card.append(
+      title,
+      capital,
+      products,
+      factories,
+      production
     );
-  }
-}
+
+    return {
+      card,
+      capital,
+      products,
+      factories,
+      production
+    };
   }
 
-  // Sistema de arrastar painéis.
+  updateExtraCompanies(competitors) {
+    const extra = competitors.slice(1);
+
+    for (const competitor of extra) {
+      if (!this.extraCompanies.has(competitor.name)) {
+        const card = this.createCompanyCard(
+          competitor.name,
+          competitor.color
+        );
+
+        this.extraCompanies.set(
+          competitor.name,
+          card
+        );
+
+        this.extraCompaniesContainer.appendChild(
+          card.card
+        );
+      }
+
+      const card = this.extraCompanies.get(competitor.name);
+
+      const stats = this.getCompanyStats(
+        competitor.economy,
+        competitor.buildings.buildings
+      );
+
+      card.capital.textContent =
+        `Capital: ${this.formatMoney(stats.money)}`;
+
+      card.products.textContent =
+        `Produtos: ${Math.floor(stats.products)}`;
+
+      card.factories.textContent =
+        `Fábricas: ${stats.factories}`;
+
+      card.production.textContent =
+        `Produção: ${stats.production}/min`;
+    }
+  }
+
   makeDraggable(panel, handle) {
     let dragging = false;
     let startX = 0;
@@ -262,7 +360,7 @@ if (this.competitorPanel) {
     handle.style.userSelect = "none";
     handle.style.touchAction = "none";
 
-    handle.addEventListener("pointerdown", (event) => {
+    handle.addEventListener("pointerdown", event => {
       if (event.button !== 0) return;
 
       dragging = true;
@@ -275,7 +373,6 @@ if (this.competitorPanel) {
       startX = event.clientX;
       startY = event.clientY;
 
-      // Converte para posicionamento por left/top.
       panel.style.left = `${panelX}px`;
       panel.style.top = `${panelY}px`;
       panel.style.right = "auto";
@@ -284,18 +381,24 @@ if (this.competitorPanel) {
       handle.style.cursor = "grabbing";
 
       handle.setPointerCapture(event.pointerId);
-
       event.preventDefault();
     });
 
-    handle.addEventListener("pointermove", (event) => {
+    handle.addEventListener("pointermove", event => {
       if (!dragging) return;
 
       const dx = event.clientX - startX;
       const dy = event.clientY - startY;
 
-      const maxX = window.innerWidth - panel.offsetWidth;
-      const maxY = window.innerHeight - panel.offsetHeight;
+      const maxX = Math.max(
+        0,
+        window.innerWidth - panel.offsetWidth
+      );
+
+      const maxY = Math.max(
+        0,
+        window.innerHeight - panel.offsetHeight
+      );
 
       const newX = Math.max(
         0,
@@ -340,8 +443,10 @@ if (this.competitorPanel) {
 
   sellProducts(amount) {
     const result = this.economy.sellProducts(amount);
+
     this.setMessage(result.message);
     this.updateMarket();
+
     return result;
   }
 
@@ -364,7 +469,10 @@ if (this.competitorPanel) {
       this.sellAllButton
     ]) {
       button.style.opacity = button.disabled ? "0.4" : "1";
-      button.style.cursor = button.disabled ? "not-allowed" : "pointer";
+
+      button.style.cursor = button.disabled
+        ? "not-allowed"
+        : "pointer";
     }
   }
 
@@ -385,7 +493,7 @@ if (this.competitorPanel) {
     };
   }
 
-  update(competitor) {
+  update(competitors = []) {
     this.money.textContent = Math.floor(
       this.economy.money
     ).toLocaleString("pt-BR");
@@ -409,37 +517,74 @@ if (this.competitorPanel) {
 
     this.updateMarket();
 
-    // Dados das empresas.
+    // Estatísticas do jogador.
     const player = this.getCompanyStats(
       this.economy,
       this.buildings.buildings
     );
 
-    const rival = this.getCompanyStats(
-      competitor.economy,
-      competitor.buildings.buildings
-    );
+    this.playerCapital.textContent =
+      this.formatMoney(player.money);
 
-    this.playerCapital.textContent = this.formatMoney(player.money);
-    this.playerProducts.textContent = Math.floor(player.products);
-    this.playerFactories.textContent = player.factories;
-    this.playerProduction.textContent = player.production + "/min";
+    this.playerProducts.textContent =
+      Math.floor(player.products);
 
-    this.rivalCapital.textContent = this.formatMoney(rival.money);
-    this.rivalProducts.textContent = Math.floor(rival.products);
-    this.rivalFactories.textContent = rival.factories;
-    this.rivalProduction.textContent = rival.production + "/min";
+    this.playerFactories.textContent =
+      player.factories;
 
-    // Liderança econômica.
-    if (player.money > rival.money) {
-      this.economicLeader.textContent = "T7STUDIO";
-      this.economicLeader.style.color = "#e4bd62";
-    } else if (rival.money > player.money) {
-      this.economicLeader.textContent = "NEXUS INDUSTRIES";
-      this.economicLeader.style.color = "#ed7777";
-    } else {
+    this.playerProduction.textContent =
+      player.production + "/min";
+
+    // Primeiro concorrente: NEXUS.
+    const nexus = competitors[0];
+
+    if (nexus) {
+      const rival = this.getCompanyStats(
+        nexus.economy,
+        nexus.buildings.buildings
+      );
+
+      this.rivalCapital.textContent =
+        this.formatMoney(rival.money);
+
+      this.rivalProducts.textContent =
+        Math.floor(rival.products);
+
+      this.rivalFactories.textContent =
+        rival.factories;
+
+      this.rivalProduction.textContent =
+        rival.production + "/min";
+    }
+
+    // Demais concorrentes.
+    this.updateExtraCompanies(competitors);
+
+    // Ranking por capital.
+    const companies = [
+      {
+        name: "T7STUDIO",
+        money: player.money,
+        color: "#e4bd62"
+      },
+      ...competitors.map(competitor => ({
+        name: competitor.name,
+        money: competitor.economy.money,
+        color: competitor.color
+      }))
+    ];
+
+    companies.sort((a, b) => b.money - a.money);
+
+    const first = companies[0];
+    const second = companies[1];
+
+    if (Math.floor(first.money) === Math.floor(second.money)) {
       this.economicLeader.textContent = "EMPATE";
       this.economicLeader.style.color = "#ffffff";
+    } else {
+      this.economicLeader.textContent = first.name;
+      this.economicLeader.style.color = first.color;
     }
   }
 
@@ -467,6 +612,7 @@ if (this.competitorPanel) {
       this.upgradeButton.textContent = "Nível máximo";
       this.upgradeButton.disabled = true;
       this.upgradeButton.style.opacity = "0.5";
+
       return;
     }
 

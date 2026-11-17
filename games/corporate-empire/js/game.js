@@ -1,4 +1,3 @@
-
 import {
   createMap,
   drawMap,
@@ -23,7 +22,45 @@ export class Game {
     this.economy = new Economy();
 
     this.buildings = new BuildingSystem();
-    this.competitor = new CompetitorAI();
+
+    // Três empresas rivais.
+    this.competitors = [
+      new CompetitorAI({
+        name: "NEXUS INDUSTRIES",
+        color: "#e85d5d",
+        strategy: "balanced",
+        x: this.map.width * 0.88,
+        y: this.map.height * 0.86,
+        money: 1500,
+        wood: 160,
+        ore: 80,
+        passiveIncome: 1.5
+      }),
+
+      new CompetitorAI({
+        name: "VERTEX LOGISTICS",
+        color: "#65a9e8",
+        strategy: "commercial",
+        x: this.map.width * 0.12,
+        y: this.map.height * 0.86,
+        money: 1700,
+        wood: 180,
+        ore: 80,
+        passiveIncome: 2
+      }),
+
+      new CompetitorAI({
+        name: "FORGECORE INDUSTRIES",
+        color: "#e89b52",
+        strategy: "industrial",
+        x: this.map.width * 0.88,
+        y: this.map.height * 0.12,
+        money: 1800,
+        wood: 200,
+        ore: 100,
+        passiveIncome: 1.5
+      })
+    ];
 
     this.showTerritoryInfo = false;
 
@@ -60,7 +97,6 @@ export class Game {
       inside: false
     };
 
-    // Controle de toques.
     this.activePointers = new Map();
     this.touchStart = null;
     this.pinchDistance = null;
@@ -78,7 +114,22 @@ export class Game {
     this.resize();
     this.addEvents();
 
-    this.ui.update(this.competitor);
+    this.ui.update(this.competitors);
+  }
+
+  getCompetitorBuildings() {
+    return this.competitors.flatMap(
+      competitor => competitor.buildings.buildings
+    );
+  }
+
+  getOccupiedBuildingsFor(competitor) {
+    return [
+      ...this.buildings.buildings,
+      ...this.competitors
+        .filter(other => other !== competitor)
+        .flatMap(other => other.buildings.buildings)
+    ];
   }
 
   resize() {
@@ -127,7 +178,7 @@ export class Game {
       world.y,
       this.map,
       this.economy,
-      this.competitor.buildings.buildings
+      this.getCompetitorBuildings()
     );
 
     this.ui.setMessage(result.message);
@@ -136,7 +187,7 @@ export class Game {
       this.selectBuilding(null);
     }
 
-    this.ui.update(this.competitor);
+    this.ui.update(this.competitors);
   }
 
   selectExistingBuilding(event) {
@@ -168,7 +219,7 @@ export class Game {
     const info = this.buildings.getUpgradeInfo(building);
 
     this.ui.showUpgrade(building, info);
-    this.ui.update(this.competitor);
+    this.ui.update(this.competitors);
   }
 
   getPointerDistance(a, b) {
@@ -206,12 +257,10 @@ export class Game {
       this.keys.delete(event.key.toLowerCase());
     });
 
-    // Movimento do mouse e dos dedos.
     this.canvas.addEventListener("pointermove", event => {
       this.updateMouse(event);
 
       if (event.pointerType !== "touch") return;
-
       if (!this.activePointers.has(event.pointerId)) return;
 
       const previous = this.activePointers.get(event.pointerId);
@@ -223,7 +272,6 @@ export class Game {
 
       this.activePointers.set(event.pointerId, current);
 
-      // Dois dedos: zoom.
       if (this.activePointers.size >= 2) {
         const pointers = [...this.activePointers.values()];
 
@@ -255,7 +303,6 @@ export class Game {
         return;
       }
 
-      // Um dedo: arrastar o mapa.
       if (this.activePointers.size === 1 && this.touchStart) {
         const dx = current.x - previous.x;
         const dy = current.y - previous.y;
@@ -331,7 +378,6 @@ export class Game {
         return;
       }
 
-      // Clique normal do computador.
       if (event.pointerType === "mouse" && event.button === 0) {
         this.updateMouse(event);
         this.placeBuilding(event);
@@ -356,14 +402,11 @@ export class Game {
       }
     });
 
-    // Zoom com roda do mouse.
     this.canvas.addEventListener("wheel", event => {
       event.preventDefault();
-
       this.camera.zoomAt(event.deltaY);
     }, { passive: false });
 
-    // Cancelamento com botão direito.
     this.canvas.addEventListener("contextmenu", event => {
       if (this.selectedBuilding) {
         event.preventDefault();
@@ -406,13 +449,16 @@ export class Game {
       this.economy
     );
 
-    this.competitor.update(
-      dt,
-      this.map,
-      this.buildings.buildings
-    );
+    // Cada empresa considera as construções das outras.
+    for (const competitor of this.competitors) {
+      competitor.update(
+        dt,
+        this.map,
+        this.getOccupiedBuildingsFor(competitor)
+      );
+    }
 
-    this.ui.update(this.competitor);
+    this.ui.update(this.competitors);
   }
 
   render() {
@@ -438,7 +484,10 @@ export class Game {
     }
 
     this.buildings.draw(ctx);
-    this.competitor.draw(ctx);
+
+    for (const competitor of this.competitors) {
+      competitor.draw(ctx);
+    }
 
     drawWorkers(
       ctx,
@@ -459,7 +508,7 @@ export class Game {
         world.x,
         world.y,
         this.map,
-        this.competitor.buildings.buildings
+        this.getCompetitorBuildings()
       );
     }
   }
