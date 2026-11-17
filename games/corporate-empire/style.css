@@ -727,56 +727,44 @@ body.panels-hidden .upgrade-panel {
 }
 
 
-/* COMPETIÇÃO: ULTRA COMPACTO */
+/* COMPETIÇÃO: ALTURA REDUZIDA */
 @media (max-width: 600px) {
   .competitor-panel {
-    width: 85px !important;
-    min-width: 0 !important;
-    max-height: 25dvh !important;
-    padding: 3px !important;
-    top: 40px !important;
-    right: 3px !important;
+    max-height: 150px !important;
+    height: auto !important;
     overflow-y: auto !important;
+    padding: 4px !important;
   }
 
   .competitor-heading {
-    font-size: 6px !important;
-    margin: 0 0 3px !important;
+    margin-bottom: 3px !important;
     padding: 2px !important;
-  }
-
-  .competitor-heading span {
-    font-size: 5px !important;
   }
 
   .company-card {
     padding: 3px !important;
-    margin: 2px 0 !important;
+    margin-bottom: 3px !important;
   }
 
   .company-name {
-    font-size: 6px !important;
-    line-height: 1.2 !important;
+    margin: 0 !important;
   }
 
   .company-capital {
-    font-size: 10px !important;
-    margin: 2px 0 !important;
+    margin: 1px 0 !important;
   }
 
-  .company-details,
+  .company-details {
+    gap: 1px !important;
+  }
+
   .production {
-    font-size: 5px !important;
-    line-height: 1.2 !important;
+    margin-top: 2px !important;
+    padding-top: 2px !important;
   }
 
   .competition-footer {
-    padding: 2px !important;
-    gap: 2px !important;
-  }
-
-  .competition-footer span,
-  .competition-footer strong {
-    font-size: 6px !important;
+    padding-top: 2px !important;
+    margin-top: 2px !important;
   }
 }
