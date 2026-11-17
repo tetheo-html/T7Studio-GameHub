@@ -94,6 +94,7 @@ export class UI {
     this.upgradeTarget = null;
 
     this.upgradePanel = document.createElement("div");
+    this.upgradePanel.classList.add("upgrade-panel");
     this.upgradePanel.style.cssText = `
       position: fixed;
       right: 20px;
@@ -171,6 +172,7 @@ export class UI {
 
     // Painel de comércio.
     this.marketPanel = document.createElement("div");
+    this.upgradePanel.classList.add("upgrade-panel");
 
     this.marketPanel.style.cssText = `
       position: fixed;
@@ -236,6 +238,19 @@ export class UI {
     );
 
     document.body.appendChild(this.marketPanel);
+
+    // Botão para esconder e mostrar os painéis.
+this.panelsToggleButton = document.getElementById("togglePanels");
+
+if (this.panelsToggleButton) {
+  this.panelsToggleButton.addEventListener("click", () => {
+    const hidden = document.body.classList.toggle("panels-hidden");
+
+    this.panelsToggleButton.textContent = hidden
+      ? "＋ MOSTRAR"
+      : "☰ PAINÉIS";
+  });
+}
 
     this.sellOneButton.addEventListener("click", () => {
       this.sellProducts(1);

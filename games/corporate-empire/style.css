@@ -547,3 +547,236 @@ main {
 .competitor-heading:active {
   cursor: grabbing;
 }
+
+
+/* =========================
+   MOBILE COMPACT + PAINÉIS
+========================= */
+
+.panels-toggle {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+
+  padding: 9px 13px;
+  border: 1px solid #d6a747;
+  border-radius: 7px;
+
+  background: rgba(27, 36, 30, 0.96);
+  color: #f0bd42;
+
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+
+.panels-toggle:hover {
+  background: #394735;
+}
+
+/* Esconder os painéis */
+body.panels-hidden .build-panel,
+body.panels-hidden .competitor-panel,
+body.panels-hidden .market-panel,
+body.panels-hidden .upgrade-panel {
+  display: none !important;
+}
+
+/* Celulares */
+@media (max-width: 600px) {
+
+  .panels-toggle {
+    top: 8px;
+    padding: 7px 10px;
+    font-size: 9px;
+  }
+
+  /* Construções */
+  .build-panel {
+    padding: 6px !important;
+    max-height: 34dvh;
+    overflow-y: auto;
+  }
+
+  .panel-heading {
+    margin-bottom: 6px;
+    font-size: 9px;
+  }
+
+  .build-buttons {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 5px;
+  }
+
+  .build-buttons button {
+    width: 100%;
+    min-width: 0;
+    padding: 6px 4px;
+    border-radius: 5px;
+  }
+
+  .build-buttons button span {
+    float: none;
+    display: block;
+    font-size: 17px;
+    margin: 0 0 3px;
+  }
+
+  .build-buttons button strong {
+    font-size: 9px;
+  }
+
+  .build-buttons button small {
+    font-size: 7px;
+    margin-top: 3px;
+  }
+
+  /* Concorrência */
+  .competitor-panel {
+    width: 135px;
+    max-height: 38dvh;
+    overflow-y: auto;
+    padding: 6px;
+  }
+
+  .company-card {
+    padding: 5px;
+  }
+
+  .company-name {
+    font-size: 8px;
+  }
+
+  .company-capital {
+    font-size: 14px;
+  }
+
+  .company-details,
+  .production {
+    font-size: 7px;
+  }
+
+  .competition-footer strong {
+    font-size: 8px;
+  }
+
+  /* Mercado */
+  .market-panel {
+    left: 8px !important;
+    right: auto !important;
+    bottom: 150px !important;
+    width: calc(50vw - 14px) !important;
+    max-width: 180px;
+    padding: 8px !important;
+  }
+
+  .market-panel h3 {
+    font-size: 13px !important;
+  }
+
+  .market-panel p {
+    font-size: 10px !important;
+  }
+
+  .market-panel button {
+    padding: 7px 3px !important;
+    font-size: 9px !important;
+  }
+
+  /* Melhorias */
+  .upgrade-panel {
+    right: 8px !important;
+    bottom: 150px !important;
+    width: calc(50vw - 14px) !important;
+    max-width: 180px;
+    padding: 9px !important;
+  }
+
+  .upgrade-panel h3 {
+    font-size: 13px !important;
+  }
+
+  .upgrade-panel p {
+    font-size: 10px !important;
+  }
+
+  .upgrade-panel button {
+    padding: 7px !important;
+    font-size: 9px;
+  }
+}
+
+/* Celulares estreitos */
+@media (max-width: 360px) {
+  .build-buttons {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .competitor-panel {
+    width: 120px;
+  }
+
+  .market-panel,
+  .upgrade-panel {
+    width: calc(50vw - 12px) !important;
+  }
+}
+
+
+/* COMPETIÇÃO: ULTRA COMPACTO */
+@media (max-width: 600px) {
+  .competitor-panel {
+    width: 85px !important;
+    min-width: 0 !important;
+    max-height: 25dvh !important;
+    padding: 3px !important;
+    top: 40px !important;
+    right: 3px !important;
+    overflow-y: auto !important;
+  }
+
+  .competitor-heading {
+    font-size: 6px !important;
+    margin: 0 0 3px !important;
+    padding: 2px !important;
+  }
+
+  .competitor-heading span {
+    font-size: 5px !important;
+  }
+
+  .company-card {
+    padding: 3px !important;
+    margin: 2px 0 !important;
+  }
+
+  .company-name {
+    font-size: 6px !important;
+    line-height: 1.2 !important;
+  }
+
+  .company-capital {
+    font-size: 10px !important;
+    margin: 2px 0 !important;
+  }
+
+  .company-details,
+  .production {
+    font-size: 5px !important;
+    line-height: 1.2 !important;
+  }
+
+  .competition-footer {
+    padding: 2px !important;
+    gap: 2px !important;
+  }
+
+  .competition-footer span,
+  .competition-footer strong {
+    font-size: 6px !important;
+  }
+}
