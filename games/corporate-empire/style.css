@@ -730,7 +730,7 @@ body.panels-hidden .upgrade-panel {
 /* COMPETIÇÃO: ALTURA REDUZIDA */
 @media (max-width: 600px) {
   .competitor-panel {
-    max-height: 150px !important;
+    max-height: 80px !important;
     height: auto !important;
     overflow-y: auto !important;
     padding: 4px !important;
