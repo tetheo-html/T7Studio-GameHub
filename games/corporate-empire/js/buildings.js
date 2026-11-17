@@ -54,12 +54,20 @@ export const BUILDING_TYPES = {
   },
 
   warehouse: {
-  name: "Armazém",
-  width: 86,
-  height: 72,
-  color: "#b58b53",
-  cost: { money: 300, wood: 40 }
-}
+    name: "Armazém",
+    width: 86,
+    height: 72,
+    color: "#b58b53",
+    cost: { money: 300, wood: 40 }
+  }
+};
+
+const UPGRADE_COSTS = {
+  sawmill: [500, 900],
+  mine: [600, 1000],
+  factory: [800, 1300],
+  commercialCenter: [700, 1100],
+  warehouse: [400, 700]
 };
 
 export class BuildingSystem {
@@ -69,9 +77,81 @@ export class BuildingSystem {
         type: "headquarters",
         x: startX,
         y: startY,
-        timer: 0
+        timer: 0,
+        level: 1
       }
     ];
+  }
+
+  findBuildingAt(x, y) {
+    // Verifica primeiro as construções desenhadas por último.
+    for (let i = this.buildings.length - 1; i >= 0; i--) {
+      const building = this.buildings[i];
+      const definition = BUILDING_TYPES[building.type];
+
+      if (
+        Math.abs(x - building.x) <= definition.width / 2 &&
+        Math.abs(y - building.y) <= definition.height / 2
+      ) {
+        return building;
+      }
+    }
+
+    return null;
+  }
+
+  getUpgradeInfo(building) {
+    if (!building) return null;
+
+    const costs = UPGRADE_COSTS[building.type];
+
+    if (!costs) return null;
+
+    const level = building.level || 1;
+
+    if (level >= 3) return null;
+
+    const cost = costs[level - 1];
+
+    const effects = {
+      sawmill: "Produção de madeira +25%",
+      mine: "Produção de minério +25%",
+      factory: "Tempo de produção reduzido",
+      commercialCenter: "Geração de dinheiro +50%",
+      warehouse: "Capacidade do estoque +100"
+    };
+
+    return {
+      currentLevel: level,
+      nextLevel: level + 1,
+      cost,
+      effect: effects[building.type]
+    };
+  }
+
+  upgrade(building, economy) {
+    const info = this.getUpgradeInfo(building);
+
+    if (!info) {
+      return {
+        ok: false,
+        message: "Essa construção já está no nível máximo."
+      };
+    }
+
+    if (!economy.spend({ money: info.cost })) {
+      return {
+        ok: false,
+        message: "Dinheiro insuficiente para a melhoria."
+      };
+    }
+
+    building.level = info.nextLevel;
+
+    return {
+      ok: true,
+      message: `${BUILDING_TYPES[building.type].name} melhorada para o nível ${building.level}!`
+    };
   }
 
   checkPlacement(type, x, y, map, occupiedBuildings = []) {
@@ -101,7 +181,6 @@ export class BuildingSystem {
 
     const spacing = 12;
 
-    // Verifica os edifícios das duas empresas.
     const allBuildings = [
       ...this.buildings,
       ...occupiedBuildings
@@ -183,6 +262,7 @@ export class BuildingSystem {
       x,
       y,
       timer: 0,
+      level: 1,
       targetId: validation.target
         ? validation.target.id
         : null
@@ -195,93 +275,115 @@ export class BuildingSystem {
   }
 
   update(dt, map, economy) {
-  // Cada armazém aumenta a capacidade em 100.
-  const warehouses = this.buildings.filter(
-    building => building.type === "warehouse"
-  ).length;
+    // Capacidade: 100 iniciais + 100 por nível de armazém.
+    const warehouses = this.buildings.filter(
+      building => building.type === "warehouse"
+    );
 
-  economy.productCapacity = 100 + warehouses * 100;
+    economy.productCapacity = 100;
 
-  for (const building of this.buildings) {
-    const definition = BUILDING_TYPES[building.type];
+    for (const warehouse of warehouses) {
+      const level = warehouse.level || 1;
 
-    if (!definition.output) continue;
+      economy.productCapacity += 100 * level;
+    }
 
-    // Produção da fábrica.
-    if (definition.recipe) {
-      const recipe = definition.recipe;
+    for (const building of this.buildings) {
+      const definition = BUILDING_TYPES[building.type];
+      const level = building.level || 1;
 
-      // Estoque cheio: pausa sem consumir materiais.
-      if (economy.products >= economy.productCapacity) {
+      if (!definition.output) continue;
+
+      // Fábrica.
+      if (definition.recipe) {
+        if (economy.products >= economy.productCapacity) {
+          continue;
+        }
+
+        const recipe = definition.recipe;
+
+        const hasMaterials =
+          economy.wood >= recipe.wood &&
+          economy.ore >= recipe.ore;
+
+        if (!hasMaterials) {
+          building.timer = 0;
+          continue;
+        }
+
+        const productionTime = Math.max(
+          2.5,
+          definition.productionTime - (level - 1) * 0.75
+        );
+
+        building.timer += dt;
+
+        if (building.timer >= productionTime) {
+          economy.wood -= recipe.wood;
+          economy.ore -= recipe.ore;
+
+          economy.add("products", 1);
+
+          building.timer -= productionTime;
+        }
+
         continue;
       }
 
-      const hasMaterials =
-        economy.wood >= recipe.wood &&
-        economy.ore >= recipe.ore;
+      // Produção de madeira, minério e dinheiro.
+      const resource = definition.resource
+        ? map.resources.find(
+            item => item.id === building.targetId
+          )
+        : null;
 
-      if (!hasMaterials) {
-        building.timer = 0;
+      if (
+        definition.resource &&
+        (!resource || resource.amount <= 0)
+      ) {
         continue;
+      }
+
+      let rate = definition.rate;
+
+      if (building.type === "sawmill" || building.type === "mine") {
+        rate *= 1 + (level - 1) * 0.25;
+      }
+
+      if (building.type === "commercialCenter") {
+        rate *= 1 + (level - 1) * 0.5;
       }
 
       building.timer += dt;
 
-      if (building.timer >= definition.productionTime) {
-        economy.wood -= recipe.wood;
-        economy.ore -= recipe.ore;
+      const possibleProduction = Math.floor(
+        building.timer * rate
+      );
 
-        economy.add("products", 1);
+      const wholeUnits = definition.resource
+        ? Math.min(
+            possibleProduction,
+            Math.floor(resource.amount)
+          )
+        : possibleProduction;
 
-        building.timer -= definition.productionTime;
+      if (wholeUnits >= 1) {
+        if (definition.output === "money") {
+          economy.money += wholeUnits;
+        } else {
+          economy.add(definition.output, wholeUnits);
+          resource.amount -= wholeUnits;
+        }
+
+        building.timer -= wholeUnits / rate;
       }
-
-      continue;
-    }
-
-    // Produção das construções tradicionais.
-    const resource = definition.resource
-      ? map.resources.find(
-          item => item.id === building.targetId
-        )
-      : null;
-
-    if (
-      definition.resource &&
-      (!resource || resource.amount <= 0)
-    ) {
-      continue;
-    }
-
-    building.timer += dt;
-
-    const possibleProduction = Math.floor(
-      building.timer * definition.rate
-    );
-
-    const wholeUnits = definition.resource
-      ? Math.min(
-          possibleProduction,
-          Math.floor(resource.amount)
-        )
-      : possibleProduction;
-
-    if (wholeUnits >= 1) {
-      if (definition.output === "money") {
-        economy.money += wholeUnits;
-      } else {
-        economy.add(definition.output, wholeUnits);
-        resource.amount -= wholeUnits;
-      }
-
-      building.timer -= wholeUnits / definition.rate;
     }
   }
-}
 
   draw(ctx, borderColor = "#e4d5a7", companyName = null) {
     for (const building of this.buildings) {
       const definition = BUILDING_TYPES[building.type];
+      const level = building.level || 1;
 
       ctx.fillStyle = "rgba(0,0,0,0.25)";
 
@@ -316,12 +418,11 @@ export class BuildingSystem {
       ctx.textAlign = "center";
 
       ctx.fillText(
-        definition.name,
+        `${definition.name} (N${level})`,
         building.x,
         building.y + definition.height / 2 + 17
       );
 
-      // Identifica a sede de cada empresa.
       if (
         companyName &&
         building.type === "headquarters"

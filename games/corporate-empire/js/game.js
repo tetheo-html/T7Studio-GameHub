@@ -1,3 +1,4 @@
+
 import {
   createMap,
   drawMap,
@@ -70,7 +71,8 @@ export class Game {
     this.ui = new UI(
       this.economy,
       type => this.selectBuilding(type),
-      this.buildings
+      this.buildings,
+      building => this.upgradeBuilding(building)
     );
 
     this.resize();
@@ -112,7 +114,10 @@ export class Game {
   }
 
   placeBuilding(event) {
-    if (!this.selectedBuilding) return;
+    if (!this.selectedBuilding) {
+      this.selectExistingBuilding(event);
+      return;
+    }
 
     const world = this.getWorldPosition(event);
 
@@ -131,6 +136,38 @@ export class Game {
       this.selectBuilding(null);
     }
 
+    this.ui.update(this.competitor);
+  }
+
+  selectExistingBuilding(event) {
+    const world = this.getWorldPosition(event);
+
+    const building = this.buildings.findBuildingAt(
+      world.x,
+      world.y
+    );
+
+    if (!building) {
+      this.ui.hideUpgrade();
+      return;
+    }
+
+    const info = this.buildings.getUpgradeInfo(building);
+
+    this.ui.showUpgrade(building, info);
+  }
+
+  upgradeBuilding(building) {
+    const result = this.buildings.upgrade(
+      building,
+      this.economy
+    );
+
+    this.ui.setMessage(result.message);
+
+    const info = this.buildings.getUpgradeInfo(building);
+
+    this.ui.showUpgrade(building, info);
     this.ui.update(this.competitor);
   }
 
@@ -340,6 +377,8 @@ export class Game {
     this.ui.select(type);
 
     if (type) {
+      this.ui.hideUpgrade();
+
       this.ui.setMessage(
         "Toque ou clique para construir. Arraste para mover o mapa."
       );
