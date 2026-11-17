@@ -3,7 +3,11 @@ export class Economy {
     this.money = 1000;
     this.wood = 100;
     this.ore = 50;
+
     this.products = 0;
+
+    // Estoque inicial.
+    this.productCapacity = 100;
   }
 
   canAfford(cost) {
@@ -27,6 +31,24 @@ export class Economy {
   add(resource, amount) {
     if (!(resource in this)) return;
 
+    if (resource === "products") {
+      this.products = Math.min(
+        this.products + amount,
+        this.productCapacity
+      );
+
+      return;
+    }
+
     this[resource] += amount;
+  }
+
+  getStockPercentage() {
+    if (this.productCapacity <= 0) return 0;
+
+    return Math.min(
+      100,
+      (this.products / this.productCapacity) * 100
+    );
   }
 }

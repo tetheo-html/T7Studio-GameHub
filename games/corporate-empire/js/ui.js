@@ -11,6 +11,37 @@ export class UI {
     this.products = document.getElementById("products");
     this.message = document.getElementById("gameMessage");
 
+    // Indicador de capacidade do estoque.
+this.stockStatus = document.createElement("div");
+this.stockStatus.style.cssText = `
+  font-size: 12px;
+  color: #c9c9c9;
+  margin-top: 5px;
+`;
+
+this.stockBar = document.createElement("div");
+this.stockBar.style.cssText = `
+  width: 120px;
+  height: 6px;
+  background: #333;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-top: 5px;
+`;
+
+this.stockFill = document.createElement("div");
+this.stockFill.style.cssText = `
+  width: 0%;
+  height: 100%;
+  background: #d6a83e;
+  transition: width 0.2s;
+`;
+
+this.stockBar.appendChild(this.stockFill);
+
+this.products.parentElement.appendChild(this.stockStatus);
+this.products.parentElement.appendChild(this.stockBar);
+
     // Painel de concorrência.
     this.playerCapital = document.getElementById("playerCapital");
     this.playerProducts = document.getElementById("playerProducts");
@@ -59,6 +90,18 @@ export class UI {
     this.wood.textContent = Math.floor(this.economy.wood);
     this.ore.textContent = Math.floor(this.economy.ore);
     this.products.textContent = Math.floor(this.economy.products);
+
+    const percentage = this.economy.getStockPercentage();
+
+this.stockStatus.textContent =
+  `Estoque: ${Math.floor(this.economy.products)} / ${this.economy.productCapacity}`;
+
+this.stockFill.style.width = percentage + "%";
+
+this.stockFill.style.background =
+  percentage >= 100 ? "#e05252" :
+  percentage >= 80 ? "#e0a83e" :
+  "#55bd76";
 
     // Dados das empresas.
     const player = this.getCompanyStats(

@@ -51,7 +51,15 @@ export const BUILDING_TYPES = {
     },
     output: "products",
     productionTime: 5
-  }
+  },
+
+  warehouse: {
+  name: "Armazém",
+  width: 86,
+  height: 72,
+  color: "#b58b53",
+  cost: { money: 300, wood: 40 }
+}
 };
 
 export class BuildingSystem {
@@ -187,77 +195,89 @@ export class BuildingSystem {
   }
 
   update(dt, map, economy) {
-    for (const building of this.buildings) {
-      const definition = BUILDING_TYPES[building.type];
+  // Cada armazém aumenta a capacidade em 100.
+  const warehouses = this.buildings.filter(
+    building => building.type === "warehouse"
+  ).length;
 
-      if (!definition.output) continue;
+  economy.productCapacity = 100 + warehouses * 100;
 
-      // Produção da fábrica.
-      if (definition.recipe) {
-        const recipe = definition.recipe;
+  for (const building of this.buildings) {
+    const definition = BUILDING_TYPES[building.type];
 
-        const hasMaterials =
-          economy.wood >= recipe.wood &&
-          economy.ore >= recipe.ore;
+    if (!definition.output) continue;
 
-        if (!hasMaterials) {
-          building.timer = 0;
-          continue;
-        }
+    // Produção da fábrica.
+    if (definition.recipe) {
+      const recipe = definition.recipe;
 
-        building.timer += dt;
-
-        if (building.timer >= definition.productionTime) {
-          economy.wood -= recipe.wood;
-          economy.ore -= recipe.ore;
-
-          economy.add("products", 1);
-
-          building.timer -= definition.productionTime;
-        }
-
+      // Estoque cheio: pausa sem consumir materiais.
+      if (economy.products >= economy.productCapacity) {
         continue;
       }
 
-      // Produção das construções tradicionais.
-      const resource = definition.resource
-        ? map.resources.find(
-            item => item.id === building.targetId
-          )
-        : null;
+      const hasMaterials =
+        economy.wood >= recipe.wood &&
+        economy.ore >= recipe.ore;
 
-      if (
-        definition.resource &&
-        (!resource || resource.amount <= 0)
-      ) {
+      if (!hasMaterials) {
+        building.timer = 0;
         continue;
       }
 
       building.timer += dt;
 
-      const possibleProduction = Math.floor(
-        building.timer * definition.rate
-      );
+      if (building.timer >= definition.productionTime) {
+        economy.wood -= recipe.wood;
+        economy.ore -= recipe.ore;
 
-      const wholeUnits = definition.resource
-        ? Math.min(
-            possibleProduction,
-            Math.floor(resource.amount)
-          )
-        : possibleProduction;
+        economy.add("products", 1);
 
-      if (wholeUnits >= 1) {
-        if (definition.output === "money") {
-          economy.money += wholeUnits;
-        } else {
-          economy.add(definition.output, wholeUnits);
-          resource.amount -= wholeUnits;
-        }
-
-        building.timer -= wholeUnits / definition.rate;
+        building.timer -= definition.productionTime;
       }
+
+      continue;
+    }
+
+    // Produção das construções tradicionais.
+    const resource = definition.resource
+      ? map.resources.find(
+          item => item.id === building.targetId
+        )
+      : null;
+
+    if (
+      definition.resource &&
+      (!resource || resource.amount <= 0)
+    ) {
+      continue;
+    }
+
+    building.timer += dt;
+
+    const possibleProduction = Math.floor(
+      building.timer * definition.rate
+    );
+
+    const wholeUnits = definition.resource
+      ? Math.min(
+          possibleProduction,
+          Math.floor(resource.amount)
+        )
+      : possibleProduction;
+
+    if (wholeUnits >= 1) {
+      if (definition.output === "money") {
+        economy.money += wholeUnits;
+      } else {
+        economy.add(definition.output, wholeUnits);
+        resource.amount -= wholeUnits;
+      }
+
+      building.timer -= wholeUnits / definition.rate;
     }
   }
+}
 
   draw(ctx, borderColor = "#e4d5a7", companyName = null) {
     for (const building of this.buildings) {
