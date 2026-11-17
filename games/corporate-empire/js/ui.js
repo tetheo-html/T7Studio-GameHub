@@ -47,40 +47,55 @@ export class UI {
       );
     }
 
-    // Painel de concorrência existente.
-    this.competitorPanel = document.querySelector(
-      ".competitor-panel"
-    );
+    // Painel de concorrência compacto.
+this.competitorPanel = document.querySelector(".competitor-panel");
 
-    this.playerCapital = document.getElementById("playerCapital");
-    this.playerProducts = document.getElementById("playerProducts");
-    this.playerFactories = document.getElementById("playerFactories");
-    this.playerProduction = document.getElementById("playerProduction");
+this.companyRows = new Map();
 
-    this.rivalCapital = document.getElementById("rivalCapital");
-    this.rivalProducts = document.getElementById("rivalProducts");
-    this.rivalFactories = document.getElementById("rivalFactories");
-    this.rivalProduction = document.getElementById("rivalProduction");
+if (this.competitorPanel) {
+  this.competitorPanel.innerHTML = "";
 
-    this.economicLeader = document.getElementById("economicLeader");
+  this.competitorPanel.style.cssText += `
+    width: 190px;
+    padding: 8px;
+  `;
 
-    // Cartões adicionais.
-    this.extraCompanies = new Map();
+  this.competitionHeading = document.createElement("div");
+  this.competitionHeading.className = "competitor-heading";
+  this.competitionHeading.textContent = "DISPUTA CORPORATIVA";
 
-    this.extraCompaniesContainer = document.createElement("div");
-    this.extraCompaniesContainer.style.cssText = `
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 8px;
-      margin-top: 10px;
-    `;
+  this.competitionHeading.style.cssText = `
+    font-size: 9px;
+    font-weight: bold;
+    margin-bottom: 6px;
+    color: #e4bd62;
+  `;
 
-    if (this.competitorPanel) {
-      this.competitorPanel.appendChild(
-        this.extraCompaniesContainer
-      );
-    }
+  this.competitionList = document.createElement("div");
 
+  this.competitionList.style.cssText = `
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  `;
+
+  this.economicLeader = document.createElement("div");
+
+  this.economicLeader.style.cssText = `
+    border-top: 1px solid #465448;
+    margin-top: 6px;
+    padding-top: 5px;
+    font-size: 8px;
+    color: #e4bd62;
+    font-weight: bold;
+  `;
+
+  this.competitorPanel.append(
+    this.competitionHeading,
+    this.competitionList,
+    this.economicLeader
+  );
+}
     // Botões de construção.
     this.buttons = document.querySelectorAll("[data-building]");
 
@@ -96,6 +111,7 @@ export class UI {
     this.upgradePanel = document.createElement("div");
     this.upgradePanel.classList.add("upgrade-panel");
     this.upgradePanel.style.cssText = `
+
       position: fixed;
       right: 20px;
       bottom: 90px;
@@ -172,7 +188,7 @@ export class UI {
 
     // Painel de comércio.
     this.marketPanel = document.createElement("div");
-    this.upgradePanel.classList.add("upgrade-panel");
+    this.marketPanel.classList.add("market-panel");
 
     this.marketPanel.style.cssText = `
       position: fixed;
@@ -279,91 +295,108 @@ if (this.panelsToggleButton) {
     }
   }
 
-  createCompanyCard(name, color) {
-    const card = document.createElement("div");
+  createCompanyRow(name, color) {
+  const row = document.createElement("div");
 
-    card.style.cssText = `
-      background: rgba(0,0,0,0.2);
-      border: 1px solid ${color};
-      border-radius: 7px;
-      padding: 10px;
-      color: white;
-      font-family: Arial, sans-serif;
-      font-size: 12px;
-    `;
+  row.style.cssText = `
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    padding: 5px;
+    background: rgba(0,0,0,0.2);
+    border-left: 2px solid ${color};
+    border-radius: 4px;
+    min-width: 0;
+  `;
 
-    const title = document.createElement("strong");
-    title.textContent = name;
-    title.style.cssText = `
-      display: block;
-      color: ${color};
-      margin-bottom: 7px;
-      font-size: 12px;
-    `;
+  const identity = document.createElement("div");
 
-    const capital = document.createElement("div");
-    const products = document.createElement("div");
-    const factories = document.createElement("div");
-    const production = document.createElement("div");
+  identity.style.cssText = `
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+  `;
 
-    card.append(
-      title,
-      capital,
-      products,
-      factories,
-      production
-    );
+  const rank = document.createElement("span");
+  rank.style.cssText = "color:#9da99d;font-size:8px;";
 
-    return {
-      card,
-      capital,
-      products,
-      factories,
-      production
-    };
-  }
+  const title = document.createElement("strong");
+  title.textContent = name;
+  title.style.cssText = `
+    color:${color};
+    font-size:8px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  `;
 
-  updateExtraCompanies(competitors) {
-    const extra = competitors.slice(1);
+  const capital = document.createElement("strong");
+  capital.style.cssText = `
+    color:white;
+    font-size:9px;
+    white-space:nowrap;
+  `;
 
-    for (const competitor of extra) {
-      if (!this.extraCompanies.has(competitor.name)) {
-        const card = this.createCompanyCard(
-          competitor.name,
-          competitor.color
-        );
+  identity.append(rank, title);
+  row.append(identity, capital);
 
-        this.extraCompanies.set(
-          competitor.name,
-          card
-        );
+  return { row, rank, title, capital };
+}
 
-        this.extraCompaniesContainer.appendChild(
-          card.card
-        );
-      }
+updateCompetition(competitors, player) {
+  if (!this.competitionList) return;
 
-      const card = this.extraCompanies.get(competitor.name);
+  const companies = [
+    {
+      name: "T7STUDIO",
+      money: player.money,
+      color: "#e4bd62"
+    },
+    ...competitors.map(competitor => ({
+      name: competitor.name,
+      money: competitor.economy.money,
+      color: competitor.color
+    }))
+  ];
 
-      const stats = this.getCompanyStats(
-        competitor.economy,
-        competitor.buildings.buildings
+  companies.sort((a, b) => b.money - a.money);
+
+  for (const company of companies) {
+    if (!this.companyRows.has(company.name)) {
+      const elements = this.createCompanyRow(
+        company.name,
+        company.color
       );
 
-      card.capital.textContent =
-        `Capital: ${this.formatMoney(stats.money)}`;
-
-      card.products.textContent =
-        `Produtos: ${Math.floor(stats.products)}`;
-
-      card.factories.textContent =
-        `Fábricas: ${stats.factories}`;
-
-      card.production.textContent =
-        `Produção: ${stats.production}/min`;
+      this.companyRows.set(company.name, elements);
+      this.competitionList.appendChild(elements.row);
     }
   }
 
+  companies.forEach((company, index) => {
+    const elements = this.companyRows.get(company.name);
+
+    elements.rank.textContent = `#${index + 1}`;
+    elements.capital.textContent = this.formatMoney(company.money);
+
+    this.competitionList.appendChild(elements.row);
+  });
+
+  const first = companies[0];
+  const second = companies[1];
+
+  if (first && second) {
+    if (Math.floor(first.money) === Math.floor(second.money)) {
+      this.economicLeader.textContent = "LÍDER: EMPATE";
+      this.economicLeader.style.color = "#fff";
+    } else {
+      this.economicLeader.textContent = `LÍDER: ${first.name}`;
+      this.economicLeader.style.color = first.color;
+    }
+  }
+}
   makeDraggable(panel, handle) {
     let dragging = false;
     let startX = 0;
@@ -532,77 +565,15 @@ if (this.panelsToggleButton) {
 
     this.updateMarket();
 
-    // Estatísticas do jogador.
-    const player = this.getCompanyStats(
-      this.economy,
-      this.buildings.buildings
-    );
+    // Atualizar concorrência.
+const player = this.getCompanyStats(
+  this.economy,
+  this.buildings.buildings
+);
 
-    this.playerCapital.textContent =
-      this.formatMoney(player.money);
+this.updateCompetition(competitors, player);
 
-    this.playerProducts.textContent =
-      Math.floor(player.products);
-
-    this.playerFactories.textContent =
-      player.factories;
-
-    this.playerProduction.textContent =
-      player.production + "/min";
-
-    // Primeiro concorrente: NEXUS.
-    const nexus = competitors[0];
-
-    if (nexus) {
-      const rival = this.getCompanyStats(
-        nexus.economy,
-        nexus.buildings.buildings
-      );
-
-      this.rivalCapital.textContent =
-        this.formatMoney(rival.money);
-
-      this.rivalProducts.textContent =
-        Math.floor(rival.products);
-
-      this.rivalFactories.textContent =
-        rival.factories;
-
-      this.rivalProduction.textContent =
-        rival.production + "/min";
-    }
-
-    // Demais concorrentes.
-    this.updateExtraCompanies(competitors);
-
-    // Ranking por capital.
-    const companies = [
-      {
-        name: "T7STUDIO",
-        money: player.money,
-        color: "#e4bd62"
-      },
-      ...competitors.map(competitor => ({
-        name: competitor.name,
-        money: competitor.economy.money,
-        color: competitor.color
-      }))
-    ];
-
-    companies.sort((a, b) => b.money - a.money);
-
-    const first = companies[0];
-    const second = companies[1];
-
-    if (Math.floor(first.money) === Math.floor(second.money)) {
-      this.economicLeader.textContent = "EMPATE";
-      this.economicLeader.style.color = "#ffffff";
-    } else {
-      this.economicLeader.textContent = first.name;
-      this.economicLeader.style.color = first.color;
-    }
   }
-
   showUpgrade(building, info) {
     this.upgradeTarget = building;
     this.upgradePanel.style.display = "block";
