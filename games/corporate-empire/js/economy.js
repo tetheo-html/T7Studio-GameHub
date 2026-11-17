@@ -1,3 +1,4 @@
+
 export class Economy {
   constructor() {
     this.money = 1000;
@@ -5,9 +6,10 @@ export class Economy {
     this.ore = 50;
 
     this.products = 0;
-
-    // Estoque inicial.
     this.productCapacity = 100;
+
+    // Preço inicial de cada produto.
+    this.productPrice = 45;
   }
 
   canAfford(cost) {
@@ -50,5 +52,32 @@ export class Economy {
       100,
       (this.products / this.productCapacity) * 100
     );
+  }
+
+  sellProducts(amount = "all") {
+    const available = Math.floor(this.products);
+
+    const quantity = amount === "all"
+      ? available
+      : Math.min(Math.floor(amount), available);
+
+    if (quantity <= 0) {
+      return {
+        ok: false,
+        message: "Você não possui produtos para vender."
+      };
+    }
+
+    const earned = quantity * this.productPrice;
+
+    this.products -= quantity;
+    this.money += earned;
+
+    return {
+      ok: true,
+      sold: quantity,
+      earned,
+      message: `${quantity} produtos vendidos por $${earned.toLocaleString("pt-BR")}!`
+    };
   }
 }

@@ -537,3 +537,13 @@ main {
     width: 140px;
   }
 }
+
+.competitor-heading {
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.competitor-heading:active {
+  cursor: grabbing;
+}

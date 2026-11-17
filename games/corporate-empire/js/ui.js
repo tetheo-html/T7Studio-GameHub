@@ -72,7 +72,6 @@ export class UI {
 
     // Painel de melhorias.
     this.upgradeTarget = null;
-
     this.upgradePanel = document.createElement("div");
 
     this.upgradePanel.style.cssText = `
@@ -93,14 +92,12 @@ export class UI {
     `;
 
     this.upgradeTitle = document.createElement("h3");
-
     this.upgradeTitle.style.cssText = `
       margin: 0 0 8px;
       font-size: 17px;
     `;
 
     this.upgradeDetails = document.createElement("p");
-
     this.upgradeDetails.style.cssText = `
       font-size: 13px;
       color: #c5c5c5;
@@ -109,7 +106,6 @@ export class UI {
     `;
 
     this.upgradeButton = document.createElement("button");
-
     this.upgradeButton.style.cssText = `
       width: 100%;
       padding: 10px;
@@ -122,9 +118,7 @@ export class UI {
     `;
 
     this.closeUpgradeButton = document.createElement("button");
-
     this.closeUpgradeButton.textContent = "Fechar";
-
     this.closeUpgradeButton.style.cssText = `
       width: 100%;
       margin-top: 7px;
@@ -154,6 +148,224 @@ export class UI {
     this.closeUpgradeButton.addEventListener("click", () => {
       this.hideUpgrade();
     });
+
+    // Painel de comércio.
+    this.marketPanel = document.createElement("div");
+
+    this.marketPanel.style.cssText = `
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      width: 230px;
+      padding: 14px;
+      background: #19191f;
+      color: white;
+      border: 1px solid #66552f;
+      border-radius: 10px;
+      z-index: 999;
+      font-family: Arial, sans-serif;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+      box-sizing: border-box;
+    `;
+
+    this.marketTitle = document.createElement("h3");
+    this.marketTitle.textContent = "📦 Mercado";
+    this.marketTitle.style.cssText = `
+      margin: 0 0 8px;
+      font-size: 17px;
+    `;
+
+    this.marketPrice = document.createElement("p");
+    this.marketPrice.style.cssText = `
+      font-size: 13px;
+      color: #c5c5c5;
+      margin: 5px 0;
+    `;
+
+    this.marketStock = document.createElement("p");
+    this.marketStock.style.cssText = `
+      font-size: 13px;
+      color: #c5c5c5;
+      margin: 5px 0 12px;
+    `;
+
+    this.marketButtons = document.createElement("div");
+    this.marketButtons.style.cssText = `
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    `;
+
+    this.sellOneButton = this.createMarketButton("Vender 1");
+    this.sellTenButton = this.createMarketButton("Vender 10");
+    this.sellAllButton = this.createMarketButton("Vender tudo");
+
+    this.sellAllButton.style.gridColumn = "1 / -1";
+
+    this.marketButtons.append(
+      this.sellOneButton,
+      this.sellTenButton,
+      this.sellAllButton
+    );
+
+    this.marketPanel.append(
+      this.marketTitle,
+      this.marketPrice,
+      this.marketStock,
+      this.marketButtons
+    );
+
+    document.body.appendChild(this.marketPanel);
+
+    this.sellOneButton.addEventListener("click", () => {
+      this.sellProducts(1);
+    });
+
+    this.sellTenButton.addEventListener("click", () => {
+      this.sellProducts(10);
+    });
+
+    this.sellAllButton.addEventListener("click", () => {
+      this.sellProducts("all");
+    });
+
+    // Ativa o drag nos painéis.
+    this.makeDraggable(this.marketPanel, this.marketTitle);
+    this.makeDraggable(this.upgradePanel, this.upgradeTitle);
+
+      // Painel de disputa corporativa.
+this.competitorPanel = document.querySelector(".competitor-panel");
+
+if (this.competitorPanel) {
+  const competitorHandle = this.competitorPanel.querySelector(
+    ".competitor-heading"
+  );
+
+  if (competitorHandle) {
+    this.makeDraggable(
+      this.competitorPanel,
+      competitorHandle
+    );
+  }
+}
+  }
+
+  // Sistema de arrastar painéis.
+  makeDraggable(panel, handle) {
+    let dragging = false;
+    let startX = 0;
+    let startY = 0;
+    let panelX = 0;
+    let panelY = 0;
+
+    handle.style.cursor = "grab";
+    handle.style.userSelect = "none";
+    handle.style.touchAction = "none";
+
+    handle.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0) return;
+
+      dragging = true;
+
+      const rect = panel.getBoundingClientRect();
+
+      panelX = rect.left;
+      panelY = rect.top;
+
+      startX = event.clientX;
+      startY = event.clientY;
+
+      // Converte para posicionamento por left/top.
+      panel.style.left = `${panelX}px`;
+      panel.style.top = `${panelY}px`;
+      panel.style.right = "auto";
+      panel.style.bottom = "auto";
+
+      handle.style.cursor = "grabbing";
+
+      handle.setPointerCapture(event.pointerId);
+
+      event.preventDefault();
+    });
+
+    handle.addEventListener("pointermove", (event) => {
+      if (!dragging) return;
+
+      const dx = event.clientX - startX;
+      const dy = event.clientY - startY;
+
+      const maxX = window.innerWidth - panel.offsetWidth;
+      const maxY = window.innerHeight - panel.offsetHeight;
+
+      const newX = Math.max(
+        0,
+        Math.min(maxX, panelX + dx)
+      );
+
+      const newY = Math.max(
+        0,
+        Math.min(maxY, panelY + dy)
+      );
+
+      panel.style.left = `${newX}px`;
+      panel.style.top = `${newY}px`;
+    });
+
+    const stopDragging = () => {
+      dragging = false;
+      handle.style.cursor = "grab";
+    };
+
+    handle.addEventListener("pointerup", stopDragging);
+    handle.addEventListener("pointercancel", stopDragging);
+  }
+
+  createMarketButton(label) {
+    const button = document.createElement("button");
+    button.textContent = label;
+
+    button.style.cssText = `
+      padding: 9px 5px;
+      background: #b58b35;
+      color: #171717;
+      border: 0;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+    `;
+
+    return button;
+  }
+
+  sellProducts(amount) {
+    const result = this.economy.sellProducts(amount);
+    this.setMessage(result.message);
+    this.updateMarket();
+    return result;
+  }
+
+  updateMarket() {
+    const products = Math.floor(this.economy.products);
+
+    this.marketPrice.textContent =
+      `Preço por produto: ${this.formatMoney(this.economy.productPrice)}`;
+
+    this.marketStock.textContent =
+      `Disponíveis para venda: ${products}`;
+
+    this.sellOneButton.disabled = products < 1;
+    this.sellTenButton.disabled = products < 10;
+    this.sellAllButton.disabled = products < 1;
+
+    for (const button of [
+      this.sellOneButton,
+      this.sellTenButton,
+      this.sellAllButton
+    ]) {
+      button.style.opacity = button.disabled ? "0.4" : "1";
+      button.style.cursor = button.disabled ? "not-allowed" : "pointer";
+    }
   }
 
   formatMoney(value) {
@@ -174,7 +386,6 @@ export class UI {
   }
 
   update(competitor) {
-    // Recursos do jogador.
     this.money.textContent = Math.floor(
       this.economy.money
     ).toLocaleString("pt-BR");
@@ -196,6 +407,8 @@ export class UI {
       percentage >= 80 ? "#e0a83e" :
       "#55bd76";
 
+    this.updateMarket();
+
     // Dados das empresas.
     const player = this.getCompanyStats(
       this.economy,
@@ -207,13 +420,11 @@ export class UI {
       competitor.buildings.buildings
     );
 
-    // T7STUDIO.
     this.playerCapital.textContent = this.formatMoney(player.money);
     this.playerProducts.textContent = Math.floor(player.products);
     this.playerFactories.textContent = player.factories;
     this.playerProduction.textContent = player.production + "/min";
 
-    // NEXUS INDUSTRIES.
     this.rivalCapital.textContent = this.formatMoney(rival.money);
     this.rivalProducts.textContent = Math.floor(rival.products);
     this.rivalFactories.textContent = rival.factories;
@@ -256,7 +467,6 @@ export class UI {
       this.upgradeButton.textContent = "Nível máximo";
       this.upgradeButton.disabled = true;
       this.upgradeButton.style.opacity = "0.5";
-
       return;
     }
 
