@@ -213,6 +213,10 @@ if (this.competitorPanel) {
       font-size: 17px;
     `;
 
+    this.marketPanel.style.height = "auto";
+    this.marketPanel.style.maxHeight = "none";
+    this.marketPanel.style.overflow = "visible";
+
     this.marketPrice = document.createElement("p");
     this.marketPrice.style.cssText = `
       font-size: 13px;
@@ -572,8 +576,7 @@ const player = this.getCompanyStats(
 );
 
 this.updateCompetition(competitors, player);
-
-  }
+}
   showUpgrade(building, info) {
     this.upgradeTarget = building;
     this.upgradePanel.style.display = "block";
