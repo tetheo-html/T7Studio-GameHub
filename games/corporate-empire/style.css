@@ -769,13 +769,21 @@ body.panels-hidden .upgrade-panel {
   }
 }
 
-/* CORREÇÃO: painel de mercado no celular */
-@media (max-width: 600px) {
-  .market-panel {
-    height: auto !important;
-    max-height: none !important;
-    overflow: visible !important;
-    overflow-y: visible !important;
-    box-sizing: border-box;
-  }
+/* CORREÇÃO DEFINITIVA DO MERCADO */
+.market-panel {
+  position: fixed !important;
+  height: fit-content !important;
+  min-height: 0 !important;
+  max-height: none !important;
+
+  overflow: hidden !important;
+  overflow-y: hidden !important;
+  overflow-x: hidden !important;
+
+  overscroll-behavior: none !important;
+  box-sizing: border-box !important;
+}
+
+.market-panel * {
+  box-sizing: border-box;
 }

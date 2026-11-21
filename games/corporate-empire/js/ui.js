@@ -213,9 +213,9 @@ if (this.competitorPanel) {
       font-size: 17px;
     `;
 
-    this.marketPanel.style.height = "auto";
+    this.marketPanel.style.height = "fit-content";
     this.marketPanel.style.maxHeight = "none";
-    this.marketPanel.style.overflow = "visible";
+    this.marketPanel.style.overflow = "hidden";
 
     this.marketPrice = document.createElement("p");
     this.marketPrice.style.cssText = `
