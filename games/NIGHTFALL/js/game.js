@@ -3,7 +3,7 @@ import { CONFIG } from "./config.js";
 import { GameMap } from "./map.js";
 import { Player } from "./player.js";
 import { Camera } from "./camera.js";
-import { DayNight } from "./dayNight.js";
+import { DayNight } from "./daynight.js";
 
 export class Game {
   constructor(canvas) {
