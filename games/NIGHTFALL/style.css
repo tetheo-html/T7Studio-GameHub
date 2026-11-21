@@ -48,10 +48,18 @@ canvas {
   letter-spacing: 3px;
 }
 
-#status {
+#status,
+#clock,
+#lantern-status {
   margin-top: 5px;
   font-size: 10px;
   color: #b6c4a8;
+}
+
+#clock {
+  font-size: 15px;
+  color: #e0dfbd;
+  font-weight: bold;
 }
 
 #controls {

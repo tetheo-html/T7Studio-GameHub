@@ -3,6 +3,7 @@ import { CONFIG } from "./config.js";
 import { GameMap } from "./map.js";
 import { Player } from "./player.js";
 import { Camera } from "./camera.js";
+import { DayNight } from "./dayNight.js";
 
 export class Game {
   constructor(canvas) {
@@ -14,17 +15,21 @@ export class Game {
 
     this.map = new GameMap();
 
-    // Jogador começa próximo à cabana.
     this.player = new Player(
       30 * CONFIG.tileSize + 24,
       33 * CONFIG.tileSize
     );
 
     this.camera = new Camera();
+    this.dayNight = new DayNight();
 
     this.keys = {};
     this.lastTime = 0;
     this.running = false;
+
+    this.statusElement = document.getElementById("status");
+    this.clockElement = document.getElementById("clock");
+    this.lanternElement = document.getElementById("lantern-status");
 
     this.setupInput();
   }
@@ -33,14 +38,19 @@ export class Game {
     window.addEventListener("keydown", event => {
       const key = event.key.toLowerCase();
 
-      this.keys[key] = true;
-
       if (
         ["arrowup", "arrowdown", "arrowleft", "arrowright", " "]
           .includes(key)
       ) {
         event.preventDefault();
       }
+
+      // Evita repetir o comando enquanto F estiver pressionado.
+      if (key === "f" && !event.repeat) {
+        this.dayNight.toggleLantern();
+      }
+
+      this.keys[key] = true;
     });
 
     window.addEventListener("keyup", event => {
@@ -76,7 +86,23 @@ export class Game {
 
   update(deltaTime) {
     this.player.update(deltaTime, this.keys, this.map);
+
+    this.dayNight.update(deltaTime);
+
     this.camera.follow(this.player, this.map);
+
+    this.updateHUD();
+  }
+
+  updateHUD() {
+    this.statusElement.textContent =
+      `DIA ${this.dayNight.dayNumber} | ${this.dayNight.getPhaseName()}`;
+
+    this.clockElement.textContent =
+      this.dayNight.getClock();
+
+    this.lanternElement.textContent =
+      `LANTERNA: ${Math.ceil(this.dayNight.battery)}%`;
   }
 
   render() {
@@ -86,5 +112,7 @@ export class Game {
 
     this.map.draw(ctx, this.camera);
     this.player.draw(ctx, this.camera);
+
+    this.dayNight.draw(ctx, this.player, this.camera);
   }
 }
